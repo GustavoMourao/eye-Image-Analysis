@@ -35,6 +35,7 @@ class Processor:
         fft_image = fftpack.fft2(self.image)
         fft_image_shift = fftpack.fftshift(fft_image)
         psd2D = np.abs(fft_image_shift)
+        # TODO: Find a way to estimate the psd or to establishment a ideal value of \sigma!
 
         angF, psd1DD = self.get_rpsd(
             psd2D,
