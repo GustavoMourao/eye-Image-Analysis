@@ -1,9 +1,7 @@
 from skimage.restoration import estimate_sigma
-from scipy import fftpack
-import numpy as np
-from scipy import ndimage
 import cv2
 from skimage.metrics import peak_signal_noise_ratio
+from skimage import filters
 
 
 class Processor:
@@ -25,11 +23,13 @@ class Processor:
         """
         Estimates the power spectrum of noise image.
         Based on Robust wavelet-based estimator of the (Gaussian) noise standard deviation.
-        (Wrapper of skimage.restoration)
+
+        Obs:
+            Wrapper of skimage.restoration
 
         Return:
         ---------
-            estimated_sigma: estimated noise standard deviation(s)        
+            estimated_sigma: estimated noise standard deviation(s)
         """
         return estimate_sigma(
             self.noisy_image,
@@ -37,17 +37,60 @@ class Processor:
             average_sigmas=True
         )
 
-    def get_global_snr(self, clean_image):
+    def get_global_snr(self, filtered_image):
         """
         Compute the peak signal to noise ratio (PSNR) for an image.
-        (Wrapper of skimage.metrics)
+
+        Obs:
+            Wrapper of skimage.metrics
 
         Args:
         ---------
-            clean_image: reference image
+            filtered_image: reference image
 
         Return:
         ---------
             psnr: peak signal to noise ratio
         """
-        return peak_signal_noise_ratio(clean_image, self.noisy_image)
+        return peak_signal_noise_ratio(filtered_image, self.noisy_image)
+
+    def filter_mean(self):
+        """
+        Filter image based on mean mask (linear). Convolves image with
+        normalized box filter.
+
+        Obs:
+            Wrapper of opencv
+
+        Return:
+        ---------
+            image_denoised: denoised image
+        """
+        return cv2.boxFilter(self.noisy_image, -1, (3,3))
+
+    def filter_median(self):
+        """
+        Filter image based on median mask (non-linear). Each output is computed
+        as the median value of the oinút samples under the analyzed window.
+
+        Obs:
+            Wrapper of skimage
+
+        Return:
+        ---------
+            image_denoised: denoised image
+        """
+        return filters.median(self.noisy_image)
+
+    def filter_wiener(self):
+        """
+        Filter image based on Wiener mask (non-linear).
+
+        Obs:
+            Wrapper of skimage
+
+        Return:
+        ---------
+            image_denoised: denoised image
+        """
+        return filters.wiener(self.noisy_image, None)
