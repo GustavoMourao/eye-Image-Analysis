@@ -14,27 +14,32 @@ class Processor:
     def __init__(self, noisy_image):
         """
         Get raw image on cv2 processing format.
-
         Args:
         ---------
-            noisy_image: noisy image (without processing steps)
+            'noisy_image': noisy image (unprocessed)
         """
         self.noisy_image = noisy_image
+        self.psf = np.ones((5, 5)) / 25
+        self.balance = 1100
+        self.hist_channel = [0]
+        self.hist_size = [256]
+        self.hist_ranges = [10, 256]
 
     def get_global_psnr(self, filtered_image):
         """
         Compute the peak signal to noise ratio (PSNR) for an image.
-
-        Obs:
-            Wrapper of skimage.metrics
-
+        This objective metric is calculated based on
+        20*log10(MAXi / sqrt(MSE)), where MAXi is the max pixel value
+        of the image and MSE is the mean square error between image and noise.
         Args:
         ---------
-            filtered_image: reference image
-
+            'filtered_image': reference image (usually without noise)
         Return:
         ---------
-            psnr: peak signal to noise ratio
+            'psnr': peak signal to noise ratio
+        Notes
+        ---------
+            Wrapper of skimage.metrics
         """
         return peak_signal_noise_ratio(
             filtered_image,
@@ -46,16 +51,15 @@ class Processor:
         Estimates the power spectrum of noise image.
         Based on Robust wavelet-based estimator of the (Gaussian)
         noise standard deviation.
-
-        Obs:
-            Wrapper of skimage.restoration
-
         Args:
         ---------
-            image: image to apply processing step
+            'image': image to apply processing step
         Return:
         ---------
-            estimated_sigma: estimated noise standard deviation
+            'estimated_sigma': estimated noise standard deviation
+        Notes
+        ---------
+            Wrapper of skimage.restoration
         """
         return estimate_sigma(
             image,
@@ -63,111 +67,103 @@ class Processor:
             average_sigmas=True
         )
 
-    def filter_mean(self, image):
+    def filter_mean(self, image, ksize=(3, 3)):
         """
         Filter image based on mean mask (linear). Convolves image with
         normalized box filter.
-
-        Obs:
-            Wrapper of opencv
-
         Args:
         ---------
-            image: image to apply processing step
-
+            'image': image to apply processing step
+            'ksize': kernel size of mask
         Return:
         ---------
-            image_denoised: denoised image
+            'image_denoised': denoised image
+        Notes
+        ---------
+            Wrapper of opencv
         """
         return cv2.boxFilter(
             image,
             -1,
-            (3, 3)
+            ksize
         )
 
     def filter_median(self, image):
         """
         Filter image based on median mask (non-linear). Each output is computed
         as the median value of the oinút samples under the analyzed window.
-
-        Obs:
-            Wrapper of skimage
-
         Args:
         ---------
-            image: image to apply processing step
-
+            'image': image to apply processing step
         Return:
         ---------
-            image_denoised: denoised image
+            'image_denoised': denoised image
+        Notes
+        ---------
+            Wrapper of skimage
         """
         return filters.median(image)
 
     def filter_wiener(self, image):
         """
         Filter image based on Wiener mask (non-linear).
-
-        Obs:
-            Wrapper of skimage
-
         Args:
         ---------
-            image: image to apply processing step
-
+            'image': image to apply processing step
         Return:
         ---------
-            image_denoised: denoised image
+            'image_denoised': denoised image
+        Notes
+        ---------
+            Wrapper of skimage
         """
+
+        # BUG: broken here for dicom images!
+
         return restoration.wiener(
             image,
-            np.ones((5, 5)) / 25,
-            1100
+            self.psf,
+            self.balance
         )
 
     def get_histogram(self, image):
         """
         Get histogram of image (tipically before filter signal).
-
-        Obs:
-            Wrapper of cv2
-
         Args:
         ---------
-            image: image to apply processing step
-
+            'image': image to apply processing step
         Return:
         ---------
-            image_hist: image histogram
+            'image_hist': image histogram
+        Notes
+        ---------
+            Wrapper of cv2
         """
         return cv2.calcHist(
             image,
-            [0],
+            self.hist_channel,
             None,
-            [256],
-            [10, 256]
+            self.hist_size,
+            self.hist_ranges
         )
 
     def get_histogram_equalized(self, image):
         """
         Histogram equalization of image (tipically before filter signal).
-
-        Obs:
-            Wrapper of cv2
-
         Args:
         ---------
-            image: image to apply processing step
-
+            'image': image to apply processing step
         Return:
         ---------
-            image_equalized: histogram image equalized
+            'image_equalized': histogram image equalized
+        Notes
+        ---------
+            Wrapper of cv2
         """
-        # img_eql = cv2.equalizeHist(image)
         return cv2.calcHist(
-            # img_eql,
             cv2.equalizeHist(image),
-            [0],
+            self.hist_channel,
             None,
-            [256],
-            [10, 256]
+            self.hist_size,
+            self.hist_ranges
         )

@@ -4,9 +4,10 @@ import os
 from Processor import Processor
 from skimage.util import random_noise
 import numpy as np
+import matplotlib.pylab as plt
 
 
-class ProcessorTest(unittest.TestCase):
+class TestProcessor(unittest.TestCase):
     """
     Class responsible to call unit test methods of Processor class.
     """
@@ -24,6 +25,9 @@ class ProcessorTest(unittest.TestCase):
         filtered_img_mean = processor.filter_mean(noise_image)
         filtered_img_mdan = processor.filter_median(noise_image)
         filtered_img_wner = processor.filter_wiener(noise_image)
+
+        plt.imshow(filtered_img_wner)
+        plt.show()
 
         psnr_filter_mean = processor.get_global_psnr(filtered_img_mean)
         psnr_filter_mdan = processor.get_global_psnr(filtered_img_mdan)
