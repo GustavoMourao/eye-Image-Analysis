@@ -1,82 +1,85 @@
 from keras.models import Sequential
 from keras.preprocessing.image import ImageDataGenerator
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, MaxPool2D, Dropout
 from keras.datasets import mnist
 import matplotlib.pyplot as plt
 import cv2
+from keras import backend as K
+
 
 if __name__ == "__main__":
     """
     Main
     """
-    (x_train, y_train), (x_test, y_test) = mnist.load_data()
-    print(type(x_train))
-    # plt.imshow(x_train[0])
-    # plt.show()
+    # Parameters configuration.
+    batch_size_num = 16
+    image_shape = (150,150,3)
 
-    num_classes = 2
-    image_shape = (150, 150, 3)
-    images = ImageDataGenerator(rescale=1/255)
-    raw_set_data = images.flow_from_directory(
-        directory='./Database/',
-        batch_size=32,
-        target_size=image_shape
+    # This is the augmentation configuration we will use for training
+    train_datagen = ImageDataGenerator(
+        rescale=1. / 255,
+        shear_range=0.2,
+        zoom_range=0.2,
+        horizontal_flip=True
     )
-
-    # TODO: separates into train/validation/test/
-    train_images = images.flow_from_directory(
+    train_images = train_datagen.flow_from_directory(
         directory='./Data/train',
-        batch_size=32,
-        target_size=image_shape
+        batch_size=batch_size_num,
+        target_size=(150, 150),
+        class_mode='binary'
     )
 
+    images = ImageDataGenerator(rescale=1/255)
     test_images = images.flow_from_directory(
         directory='./Data/test',
-        batch_size=32,
-        target_size=image_shape
+        batch_size=batch_size_num,
+        target_size=(150, 150),
+        class_mode='binary'
     )
 
     validation_images = images.flow_from_directory(
         directory='./Data/valid',
-        batch_size=32,
-        target_size=image_shape
+        batch_size=batch_size_num,
+        target_size=(150, 150),
+        class_mode='binary'
     )
 
-    # TODO: Creates labels for each class.
-    # References:
-    # https://kylewbanks.com/blog/loading-unlabeled-images-with-imagedatagenerator-flowfromdirectory-keras
-    # https://github.com/keras-team/keras/issues/3946
-
-    # TODO: apply data augmentation
     # TODO: Find ideal hiperparameters to CNN.
+    # Set up model
     model = Sequential()
-    model.add(Conv2D(32,
-                     kernel_size=(5, 5),
-                     strides=(1, 1),
-                     activation='relu',
-                     input_shape=(image_shape)
-                     )
-              )
-    model.add(MaxPooling2D(pool_size=(2, 2),
-                           strides=(2, 2)
-                           )
-              )
-    model.add(Conv2D(64, (5, 5), activation='relu'))
+    model.add(Conv2D(32, (3, 3), input_shape=image_shape))
+    model.add(Activation('relu'))
     model.add(MaxPooling2D(pool_size=(2, 2)))
-    model.add(Flatten())
-    model.add(Dense(1000, activation='relu'))
-    model.add(Dense(num_classes, activation='softmax'))
 
-    print(model.summary())
+    model.add(Conv2D(32, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-    model.compile(
+    model.add(Conv2D(64, (3, 3)))
+    model.add(Activation('relu'))
+    model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        loss='sparse_categorical_crossentropy',
-        optimizer='adam',
-        metrics=['acc']
+    model.add(Flatten())  # this converts our 3D feature maps to 1D feature vectors
+    model.add(Dense(64))
+    model.add(Activation('relu'))
+    model.add(Dropout(0.5))
+    model.add(Dense(1))
+    model.add(Activation('sigmoid'))
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer='rmsprop',
+                  metrics=['accuracy']
     )
 
-    # models.fit(
-    # )
+    model.fit_generator(
+            train_images,
+            steps_per_epoch=2000 // batch_size_num,
+            epochs=50,
+            validation_data=validation_images,
+            validation_steps=800 // batch_size_num
+    )
+
+    model.save_weights('first_try.h5')  # always save your weights after training or during training
+    print('end..')
 
     # 3.2. Evaluates ideal hiperparameters!
