@@ -5,11 +5,11 @@ if __name__ == "__main__":
     """
     Main
     """
-    batch_size_num = 16
-    image_shape = (150, 150, 3)
+    BATCH_SIZE = 16
+    IMAGE_SHAPE = (150, 150, 3)
     inter = Interpreter(
-        batch_size_num,
-        image_shape
+        BATCH_SIZE,
+        IMAGE_SHAPE
     )
 
     train_images, test_images, validation_images = inter.split_data()
@@ -20,3 +20,6 @@ if __name__ == "__main__":
     )
 
     # 3.2. Evaluates ideal hiperparameters!
+
+    # 4. Implements with offline images:
+    # https://androidkt.com/how-to-predict-images-using-trained-keras-model/

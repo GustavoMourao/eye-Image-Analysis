@@ -1,12 +1,14 @@
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, MaxPool2D, Dropout
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
 from keras.preprocessing.image import ImageDataGenerator
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 class Interpreter:
     """
     """
-    def __init__(self, batch_size, image_shape):
+    def __init__(self, batch_size, image_shape, epochs=50):
         """
         Get raw image
 
@@ -16,6 +18,7 @@ class Interpreter:
         """
         self.image_shape = image_shape
         self.batch_size = batch_size
+        self.epochs = epochs
         self.train_datagen = ImageDataGenerator(
             rescale=1. / 255,
             shear_range=0.2,
@@ -95,17 +98,31 @@ class Interpreter:
         model.add(Dense(1))
         model.add(Activation('sigmoid'))
 
-        model.compile(loss='binary_crossentropy',
-                      optimizer='rmsprop',
-                      metrics=['accuracy']
+        model.compile(
+            loss='binary_crossentropy',
+            optimizer='rmsprop',
+            metrics=['accuracy']
         )
 
-        model.fit_generator(
+        model_out = model.fit_generator(
                 train_images,
                 steps_per_epoch=2000 // self.batch_size,
-                epochs=50,
+                epochs=self.epochs,
                 validation_data=validation_images,
                 validation_steps=800 // self.batch_size
         )
 
-        model.save_weights('first_try.h5')
+        model.save_weights('model_1.h5')
+
+        N = np.arange(0, self.epochs)
+        plt.style.use("ggplot")
+        plt.figure()
+        plt.plot(N, model_out.history["loss"], label="train_loss")
+        plt.plot(N, model_out.history["val_loss"], label="val_loss")
+        plt.plot(N, model_out.history["acc"], label="train_acc")
+        plt.plot(N, model_out.history["val_acc"], label="val_acc")
+        plt.title("Training Loss and Accuracy on Dataset")
+        plt.xlabel("Epoch #")
+        plt.ylabel("Loss/Accuracy")
+        plt.legend(loc="lower left")
+        plt.savefig('model1')
