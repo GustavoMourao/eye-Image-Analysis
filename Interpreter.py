@@ -1,6 +1,7 @@
 from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
 from keras.preprocessing.image import ImageDataGenerator
+from keras.regularizers import l2
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -92,7 +93,7 @@ class Interpreter:
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(Flatten())
-        model.add(Dense(64))
+        model.add(Dense(64, bias_regularizer=l2(0.01)))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
         model.add(Dense(1))
