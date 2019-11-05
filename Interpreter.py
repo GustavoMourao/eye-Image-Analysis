@@ -9,7 +9,7 @@ import numpy as np
 class Interpreter:
     """
     """
-    def __init__(self, batch_size, image_shape, epochs=50):
+    def __init__(self, batch_size, image_shape, epochs=2):
         """
         Get raw image
 
@@ -95,8 +95,8 @@ class Interpreter:
         model.add(Flatten())
         model.add(Dense(
             64,
-            bias_regularizer=l2(0.01),
-            activation_regularizer=l2(0.02)
+            # bias_regularizer=l2(0.01),
+            activity_regularizer=l2(0.02)
             ))
         model.add(Activation('relu'))
         model.add(Dropout(0.5))
@@ -124,8 +124,8 @@ class Interpreter:
         plt.figure()
         plt.plot(N, model_out.history["loss"], label="train_loss")
         plt.plot(N, model_out.history["val_loss"], label="val_loss")
-        plt.plot(N, model_out.history["acc"], label="train_acc")
-        plt.plot(N, model_out.history["val_acc"], label="val_acc")
+        plt.plot(N, model_out.history["accuracy"], label="train_acc")
+        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
         plt.title("Training Loss and Accuracy on Dataset")
         plt.xlabel("Epoch #")
         plt.ylabel("Loss/Accuracy")
