@@ -13,6 +13,13 @@ if __name__ == "__main__":
     )
 
     train_images, test_images, validation_images = inter.split_data()
+
+    inter.windown_optimizer(
+        train_images,
+        test_images,
+        validation_images
+    )
+
     inter.train_model(
         train_images,
         test_images,

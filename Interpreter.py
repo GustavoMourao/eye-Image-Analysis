@@ -4,6 +4,12 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2, l1
 import matplotlib.pyplot as plt
 import numpy as np
+from keras.optimizers import SGD
+import keras
+from WindowsOpt import WindowOptimizer, initialize_window_setting
+from keras import regularizers
+from keras.layers import GlobalAveragePooling2D
+from keras.models import Model
 
 
 class Interpreter:
@@ -64,6 +70,92 @@ class Interpreter:
 
         return train_images, test_images, validation_images
 
+    def windown_optimizer(self, train_images, test_images, validation_images):
+        """
+        """
+        # For multi-channel WSOlayer
+        nch_window = 2
+        act_window = "sigmoid"
+        upbound_window = 255.0
+        init_windows = "ich_init"
+
+        optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+        input_shape = self.image_shape
+        input_tensor = keras.layers.Input(shape=input_shape, name="input")
+
+        # Define a window setting optimization layer
+        x = WindowOptimizer(
+            nch_window=nch_window,
+            act_window=act_window,
+            upbound_window=upbound_window,
+            kernel_initializer="he_normal",
+            kernel_regularizer=regularizers.l2(0.5 * 1e-5)
+            )(input_tensor)
+
+        # ... add some your layer here
+        x = Conv2D(
+            32,
+            (3, 3),
+            activation=None,
+            padding="same",
+            name="conv1"
+        )(x)
+        x = Activation("relu", name="conv1_relu")(x)
+        x = MaxPooling2D((7, 7), strides=(3, 3), name="pool1")(x)
+        x = Conv2D(
+            256,
+            (3, 3),
+            activation=None,
+            padding="same",
+            name="conv2"
+        )(x)
+        x = Activation("relu", name="conv2_relu")(x)
+        x = MaxPooling2D((7, 7), strides=(3, 3), name="pool2")(x)
+        x = GlobalAveragePooling2D(name="gap")(x)
+        outputs = Dense(1, activation='sigmoid', name="fc")(x)
+
+        model = Model(inputs=input_tensor, outputs=outputs, name="main_model")
+
+        # Initialize parameters of window setting opt module
+        model = initialize_window_setting(
+            model,
+            act_window=act_window,
+            init_windows=init_windows,
+            upbound_window=upbound_window
+        )
+
+        # Compile and check parameters
+        model.compile(
+            optimizer=optimizer,
+            loss='binary_crossentropy',
+            metrics=["accuracy"]
+        )
+        model.summary()
+
+        model_out = model.fit_generator(
+            train_images,
+            steps_per_epoch=2000 // self.batch_size,
+            epochs=self.epochs,
+            validation_data=validation_images,
+            validation_steps=800 // self.batch_size
+        )
+
+        # TODO: Put this in another method!
+        model.save_weights('model_2.h5')
+
+        N = np.arange(0, self.epochs)
+        plt.style.use("ggplot")
+        plt.figure()
+        plt.plot(N, model_out.history["loss"], label="train_loss")
+        plt.plot(N, model_out.history["val_loss"], label="val_loss")
+        plt.plot(N, model_out.history["accuracy"], label="train_acc")
+        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
+        plt.title("Training Loss and Accuracy on Dataset")
+        plt.xlabel("Epoch #")
+        plt.ylabel("Loss/Accuracy")
+        plt.legend(loc="lower left")
+        plt.savefig('model1')
+
     def train_model(self, train_images, test_images, validation_images):
         """
         Train simple CNN model
@@ -99,7 +191,7 @@ class Interpreter:
             activity_regularizer=l2(0.02)
             ))
         model.add(Activation('relu'))
-        model.add(Dropout(0.5))
+        # model.add(Dropout(0.2))
         model.add(Dense(1))
         model.add(Activation('sigmoid'))
 
@@ -108,15 +200,17 @@ class Interpreter:
             optimizer='rmsprop',
             metrics=['accuracy']
         )
+        model.summary()
 
         model_out = model.fit_generator(
-                train_images,
-                steps_per_epoch=2000 // self.batch_size,
-                epochs=self.epochs,
-                validation_data=validation_images,
-                validation_steps=800 // self.batch_size
+            train_images,
+            steps_per_epoch=2000 // self.batch_size,
+            epochs=self.epochs,
+            validation_data=validation_images,
+            validation_steps=800 // self.batch_size
         )
 
+        # TODO: Put this in another method!
         model.save_weights('model_2.h5')
 
         N = np.arange(0, self.epochs)
