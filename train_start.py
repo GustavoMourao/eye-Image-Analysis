@@ -6,7 +6,8 @@ if __name__ == "__main__":
     Main
     """
     BATCH_SIZE = 16
-    IMAGE_SHAPE = (150, 150, 3)
+    # IMAGE_SHAPE = (150, 150, 3)
+    IMAGE_SHAPE = (150, 150, 1)
     inter = Interpreter(
         BATCH_SIZE,
         IMAGE_SHAPE

@@ -10,6 +10,7 @@ from WindowsOpt import WindowOptimizer, initialize_window_setting
 from keras import regularizers
 from keras.layers import GlobalAveragePooling2D
 from keras.models import Model
+from functions import *
 
 
 class Interpreter:
@@ -74,7 +75,7 @@ class Interpreter:
         """
         """
         # For multi-channel WSOlayer
-        nch_window = 2
+        nch_window = 3
         act_window = "sigmoid"
         upbound_window = 255.0
         init_windows = "ich_init"
@@ -130,8 +131,26 @@ class Interpreter:
             loss='binary_crossentropy',
             metrics=["accuracy"]
         )
-        model.summary()
 
+        ## Double check initialized parameters for WSO
+        names = [weight.name for layer in model.layers for weight in layer.weights]
+        # print(names)
+        weights = model.get_weights()
+
+        for name, weight in zip(names, weights):
+            if "window_conv" in name:
+                if "kernel:0" in name:
+                    ws = weight
+                if "bias:0" in name:
+                    bs = weight
+
+        print("window optimization modeul set up (initialized with {} settings)".format(init_windows))
+        print("(WL, WW)={}".format(dict_window_settings[init_windows]))
+        print("Loaded parameter : w={} b={}".format(ws[0, 0, 0, :], bs)) # check result
+        print("Expected paramter(brain) : w=[0.11074668] b=[-5.5373344]")
+        print("Expected paramter(subdural) : w=[0.08518976] b=[-4.259488]")
+
+        # BUG> Error on dimensions. Possible solution> tensorflow.expand_dims
         model_out = model.fit_generator(
             train_images,
             steps_per_epoch=2000 // self.batch_size,
@@ -140,21 +159,31 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        # TODO: Put this in another method!
-        model.save_weights('model_2.h5')
+        model.summary()
 
-        N = np.arange(0, self.epochs)
-        plt.style.use("ggplot")
-        plt.figure()
-        plt.plot(N, model_out.history["loss"], label="train_loss")
-        plt.plot(N, model_out.history["val_loss"], label="val_loss")
-        plt.plot(N, model_out.history["accuracy"], label="train_acc")
-        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
-        plt.title("Training Loss and Accuracy on Dataset")
-        plt.xlabel("Epoch #")
-        plt.ylabel("Loss/Accuracy")
-        plt.legend(loc="lower left")
-        plt.savefig('model1')
+#        model_out = model.fit_generator(
+#            train_images,
+#            steps_per_epoch=2000 // self.batch_size,
+#            epochs=self.epochs,
+#            validation_data=validation_images,
+#            validation_steps=800 // self.batch_size
+#        )
+#
+#        # TODO: Put this in another method!
+#        model.save_weights('model_2.h5')
+#
+#        N = np.arange(0, self.epochs)
+#        plt.style.use("ggplot")
+#        plt.figure()
+#        plt.plot(N, model_out.history["loss"], label="train_loss")
+#        plt.plot(N, model_out.history["val_loss"], label="val_loss")
+#        plt.plot(N, model_out.history["accuracy"], label="train_acc")
+#        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
+#        plt.title("Training Loss and Accuracy on Dataset")
+#        plt.xlabel("Epoch #")
+#        plt.ylabel("Loss/Accuracy")
+#        plt.legend(loc="lower left")
+#        plt.savefig('model1')
 
     def train_model(self, train_images, test_images, validation_images):
         """

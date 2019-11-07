@@ -130,9 +130,11 @@ def initialize_window_setting(model, act_window="sigmoid", init_windows="abdomen
         # BUG: weights unconsistence!
         # Possible solution:
         # https://github.com/awentzonline/image-analogies/issues/39
-        new_weights = np.transpose(np.array([w_conv_new, b_conv_new])[:, :, ::-1, ::-1],(1, 1, 1, 2))
-        # reshaped_weights = convert_kernel(np.array([w_conv_new, b_conv_new]))
-        model.layers[layer_names.index(conv_layer_name)].set_weights(np.array([w_conv_new, b_conv_new]))
+        new_weights = np.transpose(np.array([w_conv_new, b_conv_new]))
+        # w_conv_new = np.array(w_conv_new).ravel()
+        # b_conv_new = np.array(b_conv_new).ravel()
+        # reshaped_weights = convert_kernel([w_conv_new, b_conv_new])
+        model.layers[layer_names.index(conv_layer_name)].set_weights([w_conv_new, b_conv_new])
 
     # single-channel window setting
     elif is_tuple(windows_setting):
