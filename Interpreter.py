@@ -16,7 +16,7 @@ from functions import *
 class Interpreter:
     """
     """
-    def __init__(self, batch_size, image_shape, epochs=2):
+    def __init__(self, batch_size, image_shape, epochs=10):
         """
         Get raw image
 
@@ -51,22 +51,25 @@ class Interpreter:
         train_images = self.train_datagen.flow_from_directory(
             directory='./Data/train',
             batch_size=self.batch_size,
-            target_size=(150, 150),
+            target_size=(225, 225),
             class_mode='binary'
+            # color_mode='grayscale'
         )
 
         test_images = self.test_datagen.flow_from_directory(
             directory='./Data/test',
             batch_size=self.batch_size,
-            target_size=(150, 150),
+            target_size=(225, 225),
             class_mode='binary'
+            # color_mode='grayscale'
         )
 
         validation_images = self.test_datagen.flow_from_directory(
             directory='./Data/valid',
             batch_size=self.batch_size,
-            target_size=(150, 150),
+            target_size=(225, 225),
             class_mode='binary'
+            # color_mode='grayscale'
         )
 
         return train_images, test_images, validation_images
@@ -75,10 +78,10 @@ class Interpreter:
         """
         """
         # For multi-channel WSOlayer
-        nch_window = 3
+        nch_window = 1
         act_window = "sigmoid"
         upbound_window = 255.0
-        init_windows = "ich_init"
+        init_windows = "stone_init"
 
         optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
         input_shape = self.image_shape
@@ -161,29 +164,30 @@ class Interpreter:
 
         model.summary()
 
-#        model_out = model.fit_generator(
-#            train_images,
-#            steps_per_epoch=2000 // self.batch_size,
-#            epochs=self.epochs,
-#            validation_data=validation_images,
-#            validation_steps=800 // self.batch_size
-#        )
-#
-#        # TODO: Put this in another method!
-#        model.save_weights('model_2.h5')
-#
-#        N = np.arange(0, self.epochs)
-#        plt.style.use("ggplot")
-#        plt.figure()
-#        plt.plot(N, model_out.history["loss"], label="train_loss")
-#        plt.plot(N, model_out.history["val_loss"], label="val_loss")
-#        plt.plot(N, model_out.history["accuracy"], label="train_acc")
-#        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
-#        plt.title("Training Loss and Accuracy on Dataset")
-#        plt.xlabel("Epoch #")
-#        plt.ylabel("Loss/Accuracy")
-#        plt.legend(loc="lower left")
-#        plt.savefig('model1')
+        model_out = model.fit_generator(
+            train_images,
+            steps_per_epoch=2000 // self.batch_size,
+            epochs=self.epochs,
+            validation_data=validation_images,
+            validation_steps=800 // self.batch_size
+        )
+
+        # TODO: Put this in another method!
+        model.save_weights('model_2.h5')
+
+        N = np.arange(0, self.epochs)
+        plt.style.use("ggplot")
+        plt.figure()
+        plt.plot(N, model_out.history["loss"], label="train_loss")
+        plt.plot(N, model_out.history["val_loss"], label="val_loss")
+        plt.plot(N, model_out.history["accuracy"], label="train_acc")
+        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
+        plt.title("Training Loss and Accuracy on Dataset")
+        plt.xlabel("Epoch #")
+        plt.ylabel("Loss/Accuracy")
+        plt.legend(loc="lower left")
+        plt.savefig('model1')
+        plt.plot()
 
     def train_model(self, train_images, test_images, validation_images):
         """
@@ -194,6 +198,7 @@ class Interpreter:
         ---------
             'image': image to apply processing step
         """
+        optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
         model = Sequential()
         model.add(
             Conv2D(
@@ -226,7 +231,8 @@ class Interpreter:
 
         model.compile(
             loss='binary_crossentropy',
-            optimizer='rmsprop',
+            # optimizer='rmsprop',
+            optimizer=optimizer,
             metrics=['accuracy']
         )
         model.summary()
@@ -254,3 +260,4 @@ class Interpreter:
         plt.ylabel("Loss/Accuracy")
         plt.legend(loc="lower left")
         plt.savefig('model1')
+        plt.plot()
