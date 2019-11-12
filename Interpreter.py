@@ -23,6 +23,8 @@ class Interpreter:
         Args:
         ---------
             batch_size:
+            image_shape:
+            epochs:
         """
         self.image_shape = image_shape
         self.batch_size = batch_size
@@ -40,7 +42,7 @@ class Interpreter:
     def split_data(self):
         """
         Splits data into train, test and validation data, according
-        to data path images
+        to data path images.
 
         Return:
         ---------
@@ -52,30 +54,45 @@ class Interpreter:
             directory='./Data/train',
             batch_size=self.batch_size,
             target_size=(225, 225),
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
         test_images = self.test_datagen.flow_from_directory(
             directory='./Data/test',
             batch_size=self.batch_size,
             target_size=(225, 225),
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
         validation_images = self.test_datagen.flow_from_directory(
             directory='./Data/valid',
             batch_size=self.batch_size,
             target_size=(225, 225),
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
         return train_images, test_images, validation_images
 
     def windown_optimizer(self, train_images, test_images, validation_images):
         """
+        Train CNN based on window optimization.
+        Reference:
+        Lee, Hyunkwang, Myeongchan Kim, and Synho Do. "Practical window
+        setting optimization for medical image deep learning."
+        arXiv preprint arXiv:1812.00572 (2018).
+
+        Args:
+        ---------
+            train_image: train set of data
+            test_image: test set of data
+            validation_images: validation set of data
+
+        Return:
+        ---------
+            loss and accuracy graph; model
         """
         # For multi-channel WSOlayer
         nch_window = 1
@@ -96,7 +113,7 @@ class Interpreter:
             kernel_regularizer=regularizers.l2(0.5 * 1e-5)
             )(input_tensor)
 
-        # ... add some your layer here
+        # Add some
         x = Conv2D(
             32,
             (3, 3),
@@ -135,9 +152,8 @@ class Interpreter:
             metrics=["accuracy"]
         )
 
-        ## Double check initialized parameters for WSO
+        # Double check initialized parameters for WSO
         names = [weight.name for layer in model.layers for weight in layer.weights]
-        # print(names)
         weights = model.get_weights()
 
         for name, weight in zip(names, weights):
@@ -153,7 +169,6 @@ class Interpreter:
         print("Expected paramter(brain) : w=[0.11074668] b=[-5.5373344]")
         print("Expected paramter(subdural) : w=[0.08518976] b=[-4.259488]")
 
-        # BUG> Error on dimensions. Possible solution> tensorflow.expand_dims
         model_out = model.fit_generator(
             train_images,
             steps_per_epoch=2000 // self.batch_size,
@@ -173,7 +188,7 @@ class Interpreter:
         )
 
         # TODO: Put this in another method!
-        model.save_weights('model_2.h5')
+        model.save_weights('model_opt.h5')
 
         N = np.arange(0, self.epochs)
         plt.style.use("ggplot")
@@ -192,11 +207,16 @@ class Interpreter:
     def train_model(self, train_images, test_images, validation_images):
         """
         Train simple CNN model
-        # TODO: Evaluates VGG16 model
 
         Args:
         ---------
-            'image': image to apply processing step
+            train_image: train set of data
+            test_image: test set of data
+            validation_images: validation set of data
+
+        Return:
+        ---------
+            loss and accuracy graph; model
         """
         optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
         model = Sequential()
@@ -225,7 +245,7 @@ class Interpreter:
             activity_regularizer=l2(0.02)
             ))
         model.add(Activation('relu'))
-        # model.add(Dropout(0.2))
+        model.add(Dropout(0.2))
         model.add(Dense(1))
         model.add(Activation('sigmoid'))
 
@@ -246,7 +266,7 @@ class Interpreter:
         )
 
         # TODO: Put this in another method!
-        model.save_weights('model_2.h5')
+        model.save_weights('model_simple.h5')
 
         N = np.arange(0, self.epochs)
         plt.style.use("ggplot")
