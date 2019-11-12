@@ -16,7 +16,7 @@ from keras.applications.inception_v3 import InceptionV3
 # https://stackoverflow.com/questions/48283625/valueerror-layer-weight-shape-3-3-3-64-not-compatible-with-provided-weight
 from keras.utils.conv_utils import convert_kernel
 
-from functions import *
+from WindowOpt.functions import *
 
 #-------------------------------------
 # Window Optimization layer : simple function

@@ -6,11 +6,12 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras.optimizers import SGD
 import keras
-from WindowsOpt import WindowOptimizer, initialize_window_setting
+# from WindowsOpt import WindowOptimizer, initialize_window_setting
 from keras import regularizers
 from keras.layers import GlobalAveragePooling2D
 from keras.models import Model
-from functions import *
+from WindowOpt.functions import *
+from WindowOpt.WindowsOpt import *
 
 
 class Interpreter:

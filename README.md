@@ -24,3 +24,7 @@ This repository has the structure:
 [2] Lee, Hyunkwang, Myeongchan Kim, and Synho Do. "Practical window setting optimization for medical image deep learning." arXiv preprint arXiv:1812.00572 (2018).
 
 [Database Adress](https://www5.cs.fau.de/research/data/fundus-images/)
+
+##### General
+
+[3] Thomas Köhler, Attila Budai, Martin Kraus, Jan Odstrcilik, Georg Michelson, Joachim Hornegger. Automatic No-Reference Quality Assessment for Retinal Fundus Images Using Vessel Segmentation, 26th IEEE Internatioal Symposium on Computer-Based Medical Systems 2013, Porto
