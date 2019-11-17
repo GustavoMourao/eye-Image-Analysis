@@ -1,6 +1,6 @@
 ### Features
 
-Glaucoma image detection based on convolutional neural netoworks.
+Glaucoma image detection based on convolutional neural networks.
 
 This repository has the structure:
 
@@ -15,15 +15,22 @@ This repository has the structure:
 
 ### Refereces
 
-##### Images Dataset
+##### Images Datasets
 
 [1] Attila Budai, Joachim Hornegger, Georg Michelson: Multiscale Approach for Blood Vessel Segmentation on Retinal Fundus Images. In Invest Ophthalmol Vis Sci 2009;50: E-Abstract 325, 2009.
+
+[Database Adress](https://www5.cs.fau.de/research/data/fundus-images/)
+
+
+[2] C. Pena-Betancor, M. Gonzalez-Hernandez, F. Fumero-Batista, J. Sigut, E. Mesa, S. Alayon, and M. G. de la Rosa,
+"Estimation of the relative amount of hemoglobin in the cup and neuro-retinal rim using stereoscopic color fundus images," IOVS, pp. IOVS–14–15592, Feb. 2015.
+
+[Database Adress](http://medimrg.webs.ull.es/research/retinal-imaging/rim-one/)
+
 
 ##### Window optimization
 
 [2] Lee, Hyunkwang, Myeongchan Kim, and Synho Do. "Practical window setting optimization for medical image deep learning." arXiv preprint arXiv:1812.00572 (2018).
-
-[Database Adress](https://www5.cs.fau.de/research/data/fundus-images/)
 
 ##### General
 
