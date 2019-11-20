@@ -4,7 +4,7 @@ import numpy as np
 
 if __name__ == "__main__":
     """
-    Main
+    Get raw data and apply CNN model.
     """
     BATCH_SIZE = 32
     IMAGE_SHAPE = (225, 225, 1)

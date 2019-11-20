@@ -40,6 +40,17 @@ class Interpreter:
             rescale=1/255
         )
 
+    def get_info_images(self, imagepath):
+        """
+        """
+        return self.train_datagen.flow_from_directory(
+            directory=imagepath,
+            batch_size=self.batch_size,
+            target_size=(225, 225),
+            class_mode='binary',
+            color_mode='grayscale'
+        )
+
     def split_data(self):
         """
         Splits data into train, test and validation data, according
