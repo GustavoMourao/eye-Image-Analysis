@@ -31,4 +31,3 @@ if __name__ == "__main__":
 
     # TODO
     # 3. Evaluates ideal hiperparameters!
-    # 4. Improve database
