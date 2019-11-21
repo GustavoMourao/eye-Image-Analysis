@@ -16,11 +16,11 @@ if __name__ == "__main__":
     train_images, test_images, validation_images = inter.split_data()
 
     # Window Optimization.
-    inter.windown_optimizer(
-        train_images,
-        test_images,
-        validation_images
-    )
+    # inter.windown_optimizer(
+    #     train_images,
+    #     test_images,
+    #     validation_images
+    # )
 
     # Traditional method.
     inter.train_model(

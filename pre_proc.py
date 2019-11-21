@@ -7,16 +7,16 @@ import matplotlib.pyplot as plt
 def crop_image(images_info):
     """
     Crop image
-    
+
     Args:
     ---------
         images_info: images path name
-    
+
     Return:
     ---------
         save croped image
     """
-    for namefile in images_info.filepaths:    
+    for namefile in images_info.filepaths:
         img = cv2.imread(namefile)
         crop_img = img[0:1424, 0:1072]
         cv2.imwrite(namefile, crop_img)
@@ -25,11 +25,11 @@ def crop_image(images_info):
 def equalized_images(images_info):
     """
     Equalize images
-    
+
     Args:
     ---------
         images_info: images path name
-    
+
     Return:
     ---------
         save equalized image

@@ -254,7 +254,7 @@ class Interpreter:
         model.add(Dense(
             64,
             # bias_regularizer=l2(0.01),
-            activity_regularizer=l2(0.02)
+            # activity_regularizer=l2(0.02)
             ))
         model.add(Activation('relu'))
         model.add(Dropout(0.2))
@@ -263,8 +263,8 @@ class Interpreter:
 
         model.compile(
             loss='binary_crossentropy',
-            # optimizer='rmsprop',
-            optimizer=optimizer,
+            optimizer='rmsprop',
+            # optimizer=optimizer,
             metrics=['accuracy']
         )
         model.summary()
