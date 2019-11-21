@@ -160,10 +160,27 @@ class Processor:
         ---------
             Wrapper of cv2
         """
-        return cv2.calcHist(
-            cv2.equalizeHist(image),
-            self.hist_channel,
-            None,
-            self.hist_size,
-            self.hist_ranges
-        )
+        # In case of colorful image.
+        if image.shape[2] == 3:
+
+            r, g, b = cv2.split(image)
+            output1_r = cv2.equalizeHist(r)
+            output1_g = cv2.equalizeHist(g)
+            output1_b = cv2.equalizeHist(b)
+
+            image = cv2.merge((
+                output1_r,
+                output1_g,
+                output1_b
+            ))
+
+            return image
+
+        else:
+            return cv2.calcHist(
+                cv2.equalizeHist(image),
+                self.hist_channel,
+                None,
+                self.hist_size,
+                self.hist_ranges
+            )
