@@ -4,7 +4,7 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2, l1
 import matplotlib.pyplot as plt
 import numpy as np
-from keras.optimizers import SGD
+from keras.optimizers import SGD, Adadelta, Nadam
 import keras
 # from WindowsOpt import WindowOptimizer, initialize_window_setting
 from keras import regularizers
@@ -112,7 +112,7 @@ class Interpreter:
         upbound_window = 255.0
         init_windows = "stone_init"
 
-        optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+        optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=False)
         input_shape = self.image_shape
         input_tensor = keras.layers.Input(shape=input_shape, name="input")
 
@@ -231,6 +231,8 @@ class Interpreter:
             loss and accuracy graph; model
         """
         optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+        optimizer = Adadelta(lr=0.001)
+        optimizer = Nadam(lr=0.001)
         model = Sequential()
         model.add(
             Conv2D(
@@ -263,8 +265,8 @@ class Interpreter:
 
         model.compile(
             loss='binary_crossentropy',
-            optimizer='rmsprop',
-            # optimizer=optimizer,
+            # optimizer='rmsprop',
+            optimizer=optimizer,
             metrics=['accuracy']
         )
         model.summary()
