@@ -17,7 +17,7 @@ from WindowOpt.WindowsOpt import *
 class Interpreter:
     """
     """
-    def __init__(self, batch_size, image_shape, epochs=10):
+    def __init__(self, batch_size, image_shape, epochs=40):
         """
         Get raw image
 
@@ -70,14 +70,6 @@ class Interpreter:
             color_mode='grayscale'
         )
 
-        test_images = self.test_datagen.flow_from_directory(
-            directory='./Data/test',
-            batch_size=self.batch_size,
-            target_size=(225, 225),
-            class_mode='binary',
-            color_mode='grayscale'
-        )
-
         validation_images = self.test_datagen.flow_from_directory(
             directory='./Data/valid',
             batch_size=self.batch_size,
@@ -86,7 +78,15 @@ class Interpreter:
             color_mode='grayscale'
         )
 
-        return train_images, test_images, validation_images
+        test_images = self.test_datagen.flow_from_directory(
+            directory='./Data/test',
+            batch_size=self.batch_size,
+            target_size=(225, 225),
+            class_mode='binary',
+            color_mode='grayscale'
+        )
+
+        return train_images, validation_images, test_images
 
     def windown_optimizer(self, train_images, test_images, validation_images):
         """
@@ -255,7 +255,7 @@ class Interpreter:
         model.add(Flatten())
         model.add(Dense(
             64,
-            # bias_regularizer=l2(0.01),
+            bias_regularizer=l2(0.01),
             # activity_regularizer=l2(0.02)
             ))
         model.add(Activation('relu'))

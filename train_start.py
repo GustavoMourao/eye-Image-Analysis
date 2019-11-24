@@ -13,7 +13,7 @@ if __name__ == "__main__":
         IMAGE_SHAPE
     )
 
-    train_images, test_images, validation_images = inter.split_data()
+    train_images, validation_images, test_images = inter.split_data()
 
     # Window Optimization.
     # inter.windown_optimizer(
