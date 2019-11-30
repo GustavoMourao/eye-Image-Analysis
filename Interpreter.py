@@ -12,10 +12,13 @@ from keras.layers import GlobalAveragePooling2D
 from keras.models import Model
 from WindowOpt.functions import *
 from WindowOpt.WindowsOpt import *
+from Graphs import Graphs
 
 
 class Interpreter:
     """
+    Class responsible to split raw data into train, validation and test.
+    Besides of that, allows to train two different CNN topologies.
     """
     def __init__(self, batch_size, image_shape, epochs=40):
         """
@@ -199,22 +202,13 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        # TODO: Put this in another method!
         model.save_weights('model_opt.h5')
 
-        N = np.arange(0, self.epochs)
-        plt.style.use("ggplot")
-        plt.figure()
-        plt.plot(N, model_out.history["loss"], label="train_loss")
-        plt.plot(N, model_out.history["val_loss"], label="val_loss")
-        plt.plot(N, model_out.history["accuracy"], label="train_acc")
-        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
-        plt.title("Training Loss and Accuracy on Dataset")
-        plt.xlabel("Epoch #")
-        plt.ylabel("Loss/Accuracy")
-        plt.legend(loc="lower left")
-        plt.savefig('model1')
-        plt.plot()
+        graphs = Graphs()
+        graphs.show_train_validation(
+            self.epochs,
+            model_out
+        )
 
     def train_model(self, train_images, test_images, validation_images):
         """
@@ -279,19 +273,10 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        # TODO: Put this in another method!
         model.save_weights('model_simple.h5')
 
-        N = np.arange(0, self.epochs)
-        plt.style.use("ggplot")
-        plt.figure()
-        plt.plot(N, model_out.history["loss"], label="train_loss")
-        plt.plot(N, model_out.history["val_loss"], label="val_loss")
-        plt.plot(N, model_out.history["accuracy"], label="train_acc")
-        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
-        plt.title("Training Loss and Accuracy on Dataset")
-        plt.xlabel("Epoch #")
-        plt.ylabel("Loss/Accuracy")
-        plt.legend(loc="lower left")
-        plt.savefig('model1')
-        plt.plot()
+        graphs = Graphs()
+        graphs.show_train_validation(
+            self.epochs,
+            model_out
+        )

@@ -6,7 +6,7 @@ if __name__ == "__main__":
     """
     Get raw data and apply CNN model.
     """
-    BATCH_SIZE = 32
+    BATCH_SIZE = 16
     IMAGE_SHAPE = (225, 225, 1)
     inter = Interpreter(
         BATCH_SIZE,
