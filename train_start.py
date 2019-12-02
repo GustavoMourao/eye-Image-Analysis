@@ -6,21 +6,18 @@ if __name__ == "__main__":
     """
     Get raw data and apply CNN model.
     """
-    BATCH_SIZE = 16
-    IMAGE_SHAPE = (225, 225, 1)
+    TARGET_SIZE = (128, 128)
+    BATCH_SIZE = 32
+    EPOCHS = 60
+    IMAGE_SHAPE = (128, 128, 1)
     inter = Interpreter(
         BATCH_SIZE,
-        IMAGE_SHAPE
+        IMAGE_SHAPE,
+        EPOCHS,
+        TARGET_SIZE
     )
 
     train_images, validation_images, test_images = inter.split_data()
-
-    # Window Optimization.
-    # inter.windown_optimizer(
-    #     train_images,
-    #     test_images,
-    #     validation_images
-    # )
 
     # Traditional method.
     inter.train_model(
@@ -28,6 +25,13 @@ if __name__ == "__main__":
         test_images,
         validation_images
     )
+
+    # Window Optimization.
+    # inter.windown_optimizer(
+    #     train_images,
+    #     test_images,
+    #     validation_images
+    # )
 
     # TODO
     # 3. Evaluates ideal hiperparameters!

@@ -20,7 +20,7 @@ class Interpreter:
     Class responsible to split raw data into train, validation and test.
     Besides of that, allows to train two different CNN topologies.
     """
-    def __init__(self, batch_size, image_shape, epochs=40):
+    def __init__(self, batch_size, image_shape, epochs=40, target_size=(128, 128)):
         """
         Get raw image
 
@@ -29,10 +29,12 @@ class Interpreter:
             batch_size:
             image_shape:
             epochs:
+            target_size:
         """
         self.image_shape = image_shape
         self.batch_size = batch_size
         self.epochs = epochs
+        self.target_size = target_size
         self.train_datagen = ImageDataGenerator(
             rescale=1. / 255,
             shear_range=0.2,
@@ -68,7 +70,7 @@ class Interpreter:
         train_images = self.train_datagen.flow_from_directory(
             directory='./Data/train',
             batch_size=self.batch_size,
-            target_size=(225, 225),
+            target_size=self.target_size,
             class_mode='binary',
             color_mode='grayscale'
         )
@@ -76,7 +78,7 @@ class Interpreter:
         validation_images = self.test_datagen.flow_from_directory(
             directory='./Data/valid',
             batch_size=self.batch_size,
-            target_size=(225, 225),
+            target_size=self.target_size,
             class_mode='binary',
             color_mode='grayscale'
         )
@@ -84,7 +86,7 @@ class Interpreter:
         test_images = self.test_datagen.flow_from_directory(
             directory='./Data/test',
             batch_size=self.batch_size,
-            target_size=(225, 225),
+            target_size=self.target_size,
             class_mode='binary',
             color_mode='grayscale'
         )
