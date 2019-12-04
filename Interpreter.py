@@ -286,7 +286,9 @@ class Interpreter:
 
     def train_efficient_net(self, train_images, test_images, validation_images):
         """
-        Train
+        Refs.:
+        https://www.kaggle.com/ateplyuk/keras-starter-efficientnet
+        https://www.kaggle.com/krishnakatyal/keras-efficientnet-b3?utm_medium=email&utm_source=intercom&utm_campaign=competition-recaps-rsna-2019
         """
         eff_net = efn.EfficientNetB3(
             weights = 'imagenet',
