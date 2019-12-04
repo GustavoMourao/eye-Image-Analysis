@@ -6,7 +6,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras.optimizers import SGD, Adadelta, Nadam
 import keras
-# from WindowsOpt import WindowOptimizer, initialize_window_setting
 from keras import regularizers
 from keras.layers import GlobalAveragePooling2D
 from keras.models import Model
@@ -211,7 +210,14 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        model.save_weights('model_opt.h5')
+        # Serialize model to json.
+        model_json = model.to_json()
+        with open("model_simple.json", "w") as json_file:
+            json_file.write(model_json)
+
+        # Serialize model to hdf5.
+        model.save_weights('model_simple.h5')
+        print('Saved model')
 
         graphs = Graphs()
         graphs.show_train_validation(
@@ -219,7 +225,14 @@ class Interpreter:
             model_out
         )
 
-    def train_model(self, train_images, test_images, validation_images):
+    def train_model(
+        self,
+        train_images,
+        test_images,
+        validation_images,
+        optimizer_test,
+        num_mid_kernel
+    ):
         """
         Train simple CNN model
 
@@ -233,9 +246,14 @@ class Interpreter:
         ---------
             loss and accuracy graph; model
         """
-        optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
-        optimizer = Adadelta(lr=0.0001)
-        optimizer = Nadam(lr=0.0001)
+        # Optimizers
+        if optimizer_test == 'SGD':
+            optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+        if optimizer_test == 'Ada':
+            optimizer = Adadelta(lr=0.0001)
+        if optimizer_test == 'Nadam':
+            optimizer = Nadam(lr=0.0001)
+
         model = Sequential()
         model.add(
             Conv2D(
@@ -251,7 +269,12 @@ class Interpreter:
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
+        # Convolutional Kernel middle layer.
         model.add(Conv2D(64, (3, 3)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
+
+        model.add(Conv2D(num_mid_kernel, (5, 5)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -261,9 +284,11 @@ class Interpreter:
             bias_regularizer=l2(0.01),
             # activity_regularizer=l2(0.02)
             ))
+
         model.add(Activation('relu'))
         model.add(Dropout(0.2))
         model.add(Dense(1))
+        # TODO: EVALUATES IF relu RETURN BETTER RESULTS (I BELIEVE YES...)
         model.add(Activation('sigmoid'))
 
         model.compile(
@@ -282,13 +307,22 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        model.save_weights('model_simple.h5')
+        # Serialize model to json.
+        model_json = model_out.to_json()
+        with open("model_simple.json", "w") as json_file:
+            json_file.write(model_json)
+
+        # Serialize model to hdf5.
+        model_out.save_weights('model_simple.h5')
+        print('Saved model')
 
         graphs = Graphs()
         graphs.show_train_validation(
             self.epochs,
             model_out
         )
+
+        return model_out
 
     def train_efficient_net(self, train_images, test_images, validation_images):
         """
@@ -331,7 +365,14 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        model.save_weights('model_eff.h5')
+        # Serialize model to json.
+        model_json = model_out.to_json()
+        with open("model_simple.json", "w") as json_file:
+            json_file.write(model_json)
+
+        # Serialize model to hdf5.
+        model_out.save_weights('model_simple.h5')
+        print('Saved model')
 
         graphs = Graphs()
         graphs.show_train_validation(

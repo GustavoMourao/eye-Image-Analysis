@@ -1,5 +1,4 @@
 from Interpreter import Interpreter
-import numpy as np
 
 
 if __name__ == "__main__":
@@ -8,12 +7,11 @@ if __name__ == "__main__":
     """
     TARGET_SIZE = (128, 128)
     BATCH_SIZE = 32
-    EPOCHS = 2
+    EPOCHS = 70
     IMAGE_SHAPE = (128, 128, 1)
     IMAGE_SHAPE_EFFI = (128, 128, 3)
     inter = Interpreter(
         BATCH_SIZE,
-        # IMAGE_SHAPE_EFFI,
         IMAGE_SHAPE,
         EPOCHS,
         TARGET_SIZE
@@ -25,7 +23,9 @@ if __name__ == "__main__":
     inter.train_model(
         train_images,
         test_images,
-        validation_images
+        validation_images,
+        'Nadam',
+        128
     )
 
     # Eff. net
@@ -41,6 +41,3 @@ if __name__ == "__main__":
     #     test_images,
     #     validation_images
     # )
-
-    # TODO
-    # 3. Evaluates ideal hiperparameters!
