@@ -21,7 +21,13 @@ class Interpreter:
     Class responsible to split raw data into train, validation and test.
     Besides of that, allows to train two different CNN topologies.
     """
-    def __init__(self, batch_size, image_shape, epochs=40, target_size=(128, 128)):
+    def __init__(
+        self,
+        batch_size,
+        image_shape,
+        epochs=40,
+        target_size=(128, 128)
+    ):
         """
         Get raw image
 
@@ -228,8 +234,8 @@ class Interpreter:
             loss and accuracy graph; model
         """
         optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
-        optimizer = Adadelta(lr=0.001)
-        optimizer = Nadam(lr=0.001)
+        optimizer = Adadelta(lr=0.0001)
+        optimizer = Nadam(lr=0.0001)
         model = Sequential()
         model.add(
             Conv2D(

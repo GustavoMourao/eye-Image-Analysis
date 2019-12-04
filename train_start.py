@@ -8,24 +8,18 @@ if __name__ == "__main__":
     """
     TARGET_SIZE = (128, 128)
     BATCH_SIZE = 32
-    EPOCHS = 60
+    EPOCHS = 2
     IMAGE_SHAPE = (128, 128, 1)
     IMAGE_SHAPE_EFFI = (128, 128, 3)
     inter = Interpreter(
         BATCH_SIZE,
-        IMAGE_SHAPE_EFFI,
+        # IMAGE_SHAPE_EFFI,
+        IMAGE_SHAPE,
         EPOCHS,
         TARGET_SIZE
     )
 
     train_images, validation_images, test_images = inter.split_data()
-
-    # Eff. net
-    inter.train_efficient_net(
-        train_images,
-        test_images,
-        validation_images
-    )
 
     # Traditional method.
     inter.train_model(
@@ -33,6 +27,13 @@ if __name__ == "__main__":
         test_images,
         validation_images
     )
+
+    # Eff. net
+    # inter.train_efficient_net(
+    #     train_images,
+    #     test_images,
+    #     validation_images
+    # )
 
     # Window Optimization.
     # inter.windown_optimizer(

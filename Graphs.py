@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
+import seaborn as sns
 import numpy as np
+import pandas as pd
 
 
 class Graphs:
@@ -24,15 +26,68 @@ class Graphs:
             graph with train/validation loss and accuracy
         """
         N = np.arange(0, epochs)
-        plt.style.use("ggplot")
-        plt.figure()
-        plt.plot(N, model_out.history["loss"], label="train_loss")
-        plt.plot(N, model_out.history["val_loss"], label="val_loss")
-        plt.plot(N, model_out.history["accuracy"], label="train_acc")
-        plt.plot(N, model_out.history["val_accuracy"], label="val_acc")
-        plt.title("Training Loss and Accuracy on Dataset")
-        plt.xlabel("Epoch #")
-        plt.ylabel("Loss/Accuracy")
-        plt.legend(loc="lower left")
-        plt.savefig('model1')
-        plt.plot()
+        model_info = pd.DataFrame()
+        model_info['N'] = N
+        model_info['loss'] = model_out.history["loss"]
+        model_info['val_loss'] = model_out.history["val_loss"]
+        model_info['accuracy'] = model_out.history["accuracy"]
+        model_info['val_accuracy'] = model_out.history["val_accuracy"]
+
+        # loss graphs
+        sns.lineplot(
+            x=model_info['N'],
+            y=model_info['loss'],
+            data=model_info
+        )
+
+        sns.lineplot(
+            x=model_info['N'],
+            y=model_info['val_loss'],
+            data=model_info
+        )
+
+        plt.title(
+            "Loss variation",
+            fontsize=20
+        )
+        plt.xlabel(
+            "Epochs",
+            fontsize=15
+        )
+        plt.ylabel(
+            "Loss",
+            fontsize=15
+        )
+
+        plt.savefig('model1_loss')
+        plt.show()
+
+        # accuracy graphs
+        sns.lineplot(
+            x=model_info['N'],
+            y=model_info['accuracy'],
+            data=model_info
+        )
+
+        sns.lineplot(
+            x=model_info['N'],
+            y=model_info['val_accuracy'],
+            data=model_info
+        )
+
+        plt.title(
+            "Accuracy variation",
+            fontsize=20
+        )
+        plt.xlabel(
+            "Epochs",
+            fontsize=15
+        )
+        plt.ylabel(
+            "Accuracy",
+            fontsize=15
+        )
+
+        plt.savefig('model1_accuracy')
+        plt.show()
+        # TODO: named legends
