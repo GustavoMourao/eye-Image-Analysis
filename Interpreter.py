@@ -13,6 +13,7 @@ from keras.models import Model
 from WindowOpt.functions import *
 from WindowOpt.WindowsOpt import *
 from Graphs import Graphs
+import efficientnet.keras as efn
 
 
 class Interpreter:
@@ -276,6 +277,53 @@ class Interpreter:
         )
 
         model.save_weights('model_simple.h5')
+
+        graphs = Graphs()
+        graphs.show_train_validation(
+            self.epochs,
+            model_out
+        )
+
+    def train_efficient_net(self, train_images, test_images, validation_images):
+        """
+        Train
+        """
+        eff_net = efn.EfficientNetB3(
+            weights = 'imagenet',
+            include_top = False,
+            pooling = 'avg',
+            input_shape = self.image_shape
+        )
+
+        x = eff_net.output
+        x = Flatten()(x)
+        x = Dense(1024, activation="relu")(x)
+        x = Dropout(0.5)(x)
+        predictions = Dense(
+            1,
+            activation="sigmoid"
+        )(x)
+        model = Model(
+            input = eff_net.input,
+            output = predictions
+        )
+        model.compile(
+            optimizers.rmsprop(lr=0.0001, decay=1e-6),
+            loss='binary_crossentropy',
+            metrics=['accuracy']
+        )
+
+        model.summary()
+
+        model_out = model.fit_generator(
+            train_images,
+            steps_per_epoch=2000 // self.batch_size,
+            epochs=self.epochs,
+            validation_data=validation_images,
+            validation_steps=800 // self.batch_size
+        )
+
+        model.save_weights('model_eff.h5')
 
         graphs = Graphs()
         graphs.show_train_validation(
