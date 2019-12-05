@@ -13,6 +13,9 @@ from WindowOpt.functions import *
 from WindowOpt.WindowsOpt import *
 from Graphs import Graphs
 import efficientnet.keras as efn
+from keras import backend as K
+import tensorflow as tf
+from keras.layers.normalization import BatchNormalization
 
 
 class Interpreter:
@@ -278,6 +281,10 @@ class Interpreter:
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
+        model.add(BatchNormalization())
+        # model.add(Conv2D(num_mid_kernel * 10, (5, 5)))
+        # model.add(Activation('relu'))
+
         model.add(Flatten())
         model.add(Dense(
             64,
@@ -308,12 +315,12 @@ class Interpreter:
         )
 
         # Serialize model to json.
-        model_json = model_out.to_json()
+        model_json = model.to_json()
         with open("model_simple.json", "w") as json_file:
             json_file.write(model_json)
 
         # Serialize model to hdf5.
-        model_out.save_weights('model_simple.h5')
+        model.save_weights('model_simple.h5')
         print('Saved model')
 
         graphs = Graphs()
@@ -324,58 +331,139 @@ class Interpreter:
 
         return model_out
 
-    def train_efficient_net(self, train_images, test_images, validation_images):
+    def train_efficient_net(
+        self,
+        train_images,
+        test_images,
+        validation_images,
+        optimizer_test
+    ):
         """
         Refs.:
         https://www.kaggle.com/ateplyuk/keras-starter-efficientnet
         https://www.kaggle.com/krishnakatyal/keras-efficientnet-b3?utm_medium=email&utm_source=intercom&utm_campaign=competition-recaps-rsna-2019
         """
-        eff_net = efn.EfficientNetB3(
-            weights = 'imagenet',
-            include_top = False,
-            pooling = 'avg',
-            input_shape = self.image_shape
-        )
+        # --- Try 1.
+        # Optimizers
+        if optimizer_test == 'SGD':
+            optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+        if optimizer_test == 'Ada':
+            optimizer = Adadelta(lr=0.0001)
+        if optimizer_test == 'Nadam':
+            optimizer = Nadam(lr=0.0001)
 
-        x = eff_net.output
-        x = Flatten()(x)
-        x = Dense(1024, activation="relu")(x)
-        x = Dropout(0.5)(x)
-        predictions = Dense(
-            1,
-            activation="sigmoid"
-        )(x)
-        model = Model(
-            input = eff_net.input,
-            output = predictions
-        )
+        # eff_net = efn.EfficientNetB3(
+        #     weights='imagenet',
+        #     include_top=False,
+        #     pooling='avg',
+        #     input_shape=self.image_shape
+        # )
+
+        # x = eff_net.output
+        # # x = Flatten()(x)
+        # x = Dense(1024, activation="relu")(x)
+        # x = Dropout(0.5)(x)
+        # predictions = Dense(
+        #     1,
+        #     activation="sigmoid"
+        # )(x)
+        # model = Model(
+        #     input=eff_net.input,
+        #     output=predictions
+        # )
+        # model.compile(
+        #     optimizer=optimizer,
+        #     # optimizers.rmsprop(lr=0.0001, decay=1e-6),
+        #     loss='binary_crossentropy',
+        #     metrics=['accuracy']
+        # )
+
+        # model.summary()
+
+        # model_out = model.fit_generator(
+        #     train_images,
+        #     steps_per_epoch=2000 // self.batch_size,
+        #     epochs=self.epochs,
+        #     validation_data=validation_images,
+        #     validation_steps=800 // self.batch_size
+        # )
+
+        # --- Try 2.
+        model = self.__create_eff_model()
+
+        # Full Training Model
+        for base_layer in model.layers[:-1]:
+            base_layer.trainable = True
+        TRAIN_STEPS = int(len(train_images) / 6)
+        LR = 0.00011
+
+        if self.epochs != 0:
+            # Load Model Weights
+            model.load_weights('model.h5')
+
         model.compile(
-            optimizers.rmsprop(lr=0.0001, decay=1e-6),
+            optimizer=Adam(learning_rate=LR),
             loss='binary_crossentropy',
-            metrics=['accuracy']
+            metrics=['acc', tf.keras.metrics.AUC()]
         )
-
         model.summary()
 
+        # Train Model
         model_out = model.fit_generator(
-            train_images,
-            steps_per_epoch=2000 // self.batch_size,
-            epochs=self.epochs,
+            generator=train_images,
             validation_data=validation_images,
-            validation_steps=800 // self.batch_size
+            steps_per_epoch=TRAIN_STEPS,
+            epochs=self.epochs,
+            callbacks=[self.__model_checkpoint_full('model.h5')],
+            verbose=1
         )
 
         # Serialize model to json.
-        model_json = model_out.to_json()
+        model_json = model.to_json()
         with open("model_simple.json", "w") as json_file:
             json_file.write(model_json)
 
         # Serialize model to hdf5.
-        model_out.save_weights('model_simple.h5')
+        model.save_weights('model_simple.h5')
         print('Saved model')
 
         graphs = Graphs()
         graphs.show_train_validation(
             self.epochs,
             model_out
+        )
+
+    def __create_eff_model(self):
+        """
+        """
+        K.clear_session()
+        base_model = efn.EfficientNetB3(
+            weights='imagenet',
+            include_top=False,
+            pooling='avg',
+            input_shape=self.image_shape
+        )
+
+        x = base_model.output
+        y_pred = Dense(
+            6,
+            activation='sigmoid'
+        )(x)
+
+        return Model(
+            inputs=base_model.input,
+            outputs=y_pred
+        )
+
+    def __model_checkpoint_full(self, model_name):
+        """
+        """
+        return ModelCheckpoint(
+            model_name,
+            monitor = 'val_loss',
+            verbose = 1,
+            save_best_only = False,
+            save_weights_only = True,
+            mode = 'min',
+            period = 1
         )

@@ -12,7 +12,7 @@ if __name__ == "__main__":
     """
     TARGET_SIZE = (128, 128)
     BATCH_SIZE = 32
-    EPOCHS = 2
+    EPOCHS = 50
     IMAGE_SHAPE = (128, 128, 1)
     inter = Interpreter(
         BATCH_SIZE,
@@ -32,11 +32,18 @@ if __name__ == "__main__":
     # Load weights.
     loaded_model.load_weights('model_simple.h5')
 
+    loaded_model.compile(
+        loss='binary_crossentropy',
+        optimizer='rmsprop',
+        metrics=['accuracy']
+    )
+
     pred = loaded_model.predict(
         test_images
     )
-    pred[pred < 0.5] = 0
-    pred[pred >= 0.5] = 1
+    pred[pred <= 0.5] = 0
+    pred[pred > 0.5] = 1
+
     print(accuracy_score(
         test_images.classes,
         pred
@@ -45,8 +52,9 @@ if __name__ == "__main__":
     graphs = Graphs()
     graphs.show_confusion_matrix(
         test_images.classes,
+        # train_images.classes,
         pred,
-        np.array(['glaucoma', 'non-glaucoma'])
+        np.array(['glaucoma', 'healthy'])
     )
 
     # TODO: Represents ROC curve could be better...
