@@ -16,6 +16,7 @@ import efficientnet.keras as efn
 from keras import backend as K
 import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
+from sklearn.metrics import accuracy_score
 
 
 class Interpreter:
@@ -308,11 +309,27 @@ class Interpreter:
 
         model_out = model.fit_generator(
             train_images,
-            steps_per_epoch=2000 // self.batch_size,
+            # steps_per_epoch=2000 // self.batch_size,
+            steps_per_epoch=len(train_images.classes) // self.batch_size,
             epochs=self.epochs,
             validation_data=validation_images,
-            validation_steps=800 // self.batch_size
+            # validation_steps=800 // self.batch_size
+            validation_steps=len(validation_images.classes) // self.batch_size
         )
+
+        print('----------------')
+        score = model.evaluate_generator(
+            validation_images,
+            len(validation_images.classes) // self.batch_size
+        )
+        print(score)
+
+        scores = model.predict_generator(
+            test_images,
+            len(validation_images.classes) // self.batch_size
+        )
+        print(scores)
+        print('----------------')
 
         # Serialize model to json.
         model_json = model.to_json()
@@ -327,6 +344,32 @@ class Interpreter:
         graphs.show_train_validation(
             self.epochs,
             model_out
+        )
+
+        # Test:
+        # pred = model.predict(
+        #     # test_images
+        #     train_images
+        # )
+        pred = model.predict_generator(
+            test_images
+            # len(test_images.classes) // self.batch_size
+        )
+        pred[pred <= 0.5] = 0
+        pred[pred > 0.5] = 1
+
+        print(accuracy_score(
+            test_images.classes,
+            # train_images.classes,
+            pred
+        ))
+
+        graphs = Graphs()
+        graphs.show_confusion_matrix(
+            test_images.classes,
+            # train_images.classes,
+            pred,
+            np.array(['glaucoma', 'healthy'])
         )
 
         return model_out
