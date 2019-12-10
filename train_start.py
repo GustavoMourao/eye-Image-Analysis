@@ -7,7 +7,7 @@ if __name__ == "__main__":
     """
     TARGET_SIZE = (128, 128)
     BATCH_SIZE = 32
-    EPOCHS = 30
+    EPOCHS = 100
     IMAGE_SHAPE = (128, 128, 1)
     IMAGE_SHAPE_EFFI = (128, 128, 3)
     inter = Interpreter(

@@ -297,7 +297,7 @@ class Interpreter:
         model.add(Dropout(0.2))
         model.add(Dense(1))
         # TODO: EVALUATES IF relu RETURN BETTER RESULTS (I BELIEVE YES...)
-        model.add(Activation('sigmoid'))
+        model.add(Activation('relu'))
 
         model.compile(
             loss='binary_crossentropy',
