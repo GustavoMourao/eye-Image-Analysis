@@ -444,11 +444,19 @@ class Interpreter:
             # Load Model Weights
             model.load_weights('model.h5')
 
+        # model.compile(
+        #     optimizer=Adam(learning_rate=LR),
+        #     loss='binary_crossentropy',
+        #     metrics=['acc', tf.keras.metrics.AUC()]
+        # )
+
         model.compile(
-            optimizer=Adam(learning_rate=LR),
             loss='binary_crossentropy',
-            metrics=['acc', tf.keras.metrics.AUC()]
+            # optimizer='rmsprop',
+            optimizer=optimizer,
+            metrics=['accuracy']
         )
+
         model.summary()
 
         # Train Model
