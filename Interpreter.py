@@ -461,6 +461,20 @@ class Interpreter:
             verbose=1
         )
 
+        print('----------------')
+        score = model.evaluate_generator(
+            validation_images,
+            len(validation_images.classes) // self.batch_size
+        )
+        print(score)
+
+        scores = model.predict_generator(
+            test_images,
+            len(validation_images.classes) // self.batch_size
+        )
+        print(scores)
+        print('----------------')
+
         # Serialize model to json.
         model_json = model.to_json()
         with open("model_simple.json", "w") as json_file:
@@ -475,6 +489,34 @@ class Interpreter:
             self.epochs,
             model_out
         )
+
+        # Test:
+        # pred = model.predict(
+        #     # test_images
+        #     train_images
+        # )
+        pred = model.predict_generator(
+            test_images
+            # len(test_images.classes) // self.batch_size
+        )
+        pred[pred <= 0.5] = 0
+        pred[pred > 0.5] = 1
+
+        print(accuracy_score(
+            test_images.classes,
+            # train_images.classes,
+            pred
+        ))
+
+        graphs = Graphs()
+        graphs.show_confusion_matrix(
+            test_images.classes,
+            # train_images.classes,
+            pred,
+            np.array(['glaucoma', 'healthy'])
+        )
+
+        return model_out
 
     def __create_eff_model(self):
         """
