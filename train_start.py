@@ -12,7 +12,8 @@ if __name__ == "__main__":
     IMAGE_SHAPE_EFFI = (128, 128, 3)
     inter = Interpreter(
         BATCH_SIZE,
-        IMAGE_SHAPE,
+        # IMAGE_SHAPE,
+        IMAGE_SHAPE_EFFI,
         EPOCHS,
         TARGET_SIZE
     )

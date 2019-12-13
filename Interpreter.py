@@ -12,11 +12,12 @@ from keras.models import Model
 from WindowOpt.functions import *
 from WindowOpt.WindowsOpt import *
 from Graphs import Graphs
-import efficientnet.keras as efn
+# import efficientnet.keras as efn
 from keras import backend as K
 import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import accuracy_score
+from tensorflow.python.keras.metrics import Metric
 
 
 class Interpreter:
@@ -63,7 +64,7 @@ class Interpreter:
             batch_size=self.batch_size,
             target_size=(225, 225),
             class_mode='binary',
-            color_mode='grayscale'
+#             color_mode='grayscale'
         )
 
     def split_data(self):
@@ -82,23 +83,23 @@ class Interpreter:
             batch_size=self.batch_size,
             target_size=self.target_size,
             class_mode='binary',
-            color_mode='grayscale'
+#             color_mode='grayscale'
         )
 
         validation_images = self.test_datagen.flow_from_directory(
             directory='./Data/valid',
             batch_size=self.batch_size,
             target_size=self.target_size,
-            class_mode='binary',
-            color_mode='grayscale'
+            class_mode='binary'
+#             color_mode='grayscale'
         )
 
         test_images = self.test_datagen.flow_from_directory(
             directory='./Data/test',
             batch_size=self.batch_size,
             target_size=self.target_size,
-            class_mode='binary',
-            color_mode='grayscale'
+            class_mode='binary'
+#             color_mode='grayscale'
         )
 
         return train_images, validation_images, test_images
@@ -281,6 +282,10 @@ class Interpreter:
         model.add(Conv2D(num_mid_kernel, (5, 5)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
+        
+        model.add(Conv2D(128, (4, 4)))
+        model.add(Activation('relu'))
+        model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(BatchNormalization())
         # model.add(Conv2D(num_mid_kernel * 10, (5, 5)))
@@ -297,7 +302,7 @@ class Interpreter:
         model.add(Dropout(0.2))
         model.add(Dense(1))
         # TODO: EVALUATES IF relu RETURN BETTER RESULTS (I BELIEVE YES...)
-        model.add(Activation('relu'))
+        model.add(Activation('sigmoid'))
 
         model.compile(
             loss='binary_crossentropy',
@@ -395,78 +400,43 @@ class Interpreter:
         if optimizer_test == 'Nadam':
             optimizer = Nadam(lr=0.0001)
 
-        # eff_net = efn.EfficientNetB3(
-        #     weights='imagenet',
-        #     include_top=False,
-        #     pooling='avg',
-        #     input_shape=self.image_shape
-        # )
+        eff_net = efn.EfficientNetB3(
+            weights='imagenet',
+            include_top=False,
+            pooling='avg',
+            input_shape=self.image_shape
+        )
+        print('aqui 1')
 
-        # x = eff_net.output
-        # # x = Flatten()(x)
-        # x = Dense(1024, activation="relu")(x)
-        # x = Dropout(0.5)(x)
-        # predictions = Dense(
-        #     1,
-        #     activation="sigmoid"
-        # )(x)
-        # model = Model(
-        #     input=eff_net.input,
-        #     output=predictions
-        # )
-        # model.compile(
-        #     optimizer=optimizer,
-        #     # optimizers.rmsprop(lr=0.0001, decay=1e-6),
-        #     loss='binary_crossentropy',
-        #     metrics=['accuracy']
-        # )
-
-        # model.summary()
-
-        # model_out = model.fit_generator(
-        #     train_images,
-        #     steps_per_epoch=2000 // self.batch_size,
-        #     epochs=self.epochs,
-        #     validation_data=validation_images,
-        #     validation_steps=800 // self.batch_size
-        # )
-
-        # --- Try 2.
-        model = self.__create_eff_model()
-
-        # Full Training Model
-        for base_layer in model.layers[:-1]:
-            base_layer.trainable = True
-        TRAIN_STEPS = int(len(train_images) / 6)
-        LR = 0.00011
-
-        if self.epochs != 0:
-            # Load Model Weights
-            model.load_weights('model.h5')
-
-        # model.compile(
-        #     optimizer=Adam(learning_rate=LR),
-        #     loss='binary_crossentropy',
-        #     metrics=['acc', tf.keras.metrics.AUC()]
-        # )
-
+        x = eff_net.output
+        # x = Flatten()(x)
+        x = Dense(1024, activation="relu")(x)
+        x = Dropout(0.5)(x)
+        predictions = Dense(
+            1,
+            activation="sigmoid"
+        )(x)
+        model = Model(
+            input=eff_net.input,
+            output=predictions
+        )
+        print('aqui 2')
         model.compile(
-            loss='binary_crossentropy',
-            # optimizer='rmsprop',
             optimizer=optimizer,
+            # optimizers.rmsprop(lr=0.0001, decay=1e-6),
+            loss='binary_crossentropy',
             metrics=['accuracy']
         )
+        print('aqui 3')
 
         model.summary()
 
-        # Train Model
         model_out = model.fit_generator(
-            generator=train_images,
-            validation_data=validation_images,
-            steps_per_epoch=TRAIN_STEPS,
+            train_images,
+            steps_per_epoch=2000 // self.batch_size,
             epochs=self.epochs,
-            callbacks=[self.__model_checkpoint_full('model.h5')],
-            verbose=1
+            validation_data=validation_images,
+            validation_steps=800 // self.batch_size
         )
 
         print('----------------')
