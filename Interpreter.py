@@ -63,7 +63,7 @@ class Interpreter:
             directory=imagepath,
             batch_size=self.batch_size,
             target_size=(225, 225),
-            class_mode='binary',
+            class_mode='binary'
 #             color_mode='grayscale'
         )
 
@@ -233,7 +233,6 @@ class Interpreter:
     def train_model(
         self,
         train_images,
-        test_images,
         validation_images,
         optimizer_test,
         num_mid_kernel
@@ -288,9 +287,6 @@ class Interpreter:
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
         model.add(BatchNormalization())
-        # model.add(Conv2D(num_mid_kernel * 10, (5, 5)))
-        # model.add(Activation('relu'))
-
         model.add(Flatten())
         model.add(Dense(
             64,
@@ -301,7 +297,6 @@ class Interpreter:
         model.add(Activation('relu'))
         model.add(Dropout(0.2))
         model.add(Dense(1))
-        # TODO: EVALUATES IF relu RETURN BETTER RESULTS (I BELIEVE YES...)
         model.add(Activation('sigmoid'))
 
         model.compile(
@@ -314,70 +309,13 @@ class Interpreter:
 
         model_out = model.fit_generator(
             train_images,
-            # steps_per_epoch=2000 // self.batch_size,
             steps_per_epoch=len(train_images.classes) // self.batch_size,
             epochs=self.epochs,
             validation_data=validation_images,
-            # validation_steps=800 // self.batch_size
             validation_steps=len(validation_images.classes) // self.batch_size
         )
 
-        print('----------------')
-        score = model.evaluate_generator(
-            validation_images,
-            len(validation_images.classes) // self.batch_size
-        )
-        print(score)
-
-        scores = model.predict_generator(
-            test_images,
-            len(validation_images.classes) // self.batch_size
-        )
-        print(scores)
-        print('----------------')
-
-        # Serialize model to json.
-        model_json = model.to_json()
-        with open("model_simple.json", "w") as json_file:
-            json_file.write(model_json)
-
-        # Serialize model to hdf5.
-        model.save_weights('model_simple.h5')
-        print('Saved model')
-
-        graphs = Graphs()
-        graphs.show_train_validation(
-            self.epochs,
-            model_out
-        )
-
-        # Test:
-        # pred = model.predict(
-        #     # test_images
-        #     train_images
-        # )
-        pred = model.predict_generator(
-            test_images
-            # len(test_images.classes) // self.batch_size
-        )
-        pred[pred <= 0.5] = 0
-        pred[pred > 0.5] = 1
-
-        print(accuracy_score(
-            test_images.classes,
-            # train_images.classes,
-            pred
-        ))
-
-        graphs = Graphs()
-        graphs.show_confusion_matrix(
-            test_images.classes,
-            # train_images.classes,
-            pred,
-            np.array(['glaucoma', 'healthy'])
-        )
-
-        return model_out
+        return model, model_out
 
     def train_efficient_net(
         self,
@@ -495,6 +433,70 @@ class Interpreter:
         )
 
         return model_out
+
+    def model_evaluation_test(
+        self,
+        test_images,
+        validation_images,        
+        model,
+        model_out
+    ):
+        """
+        Get score from test data from trained model.
+
+        Args:
+        ---------
+            model: 
+            model_out: 
+
+        Return:
+        ---------
+            loss and accuracy graph; model
+        """
+        # Get score from test images after train.
+        scores = model.predict_generator(
+            test_images,
+            len(validation_images.classes) // self.batch_size
+        )
+
+        graphs = Graphs()
+        graphs.show_train_validation(
+            self.epochs,
+            model_out
+        )
+
+        pred = model.predict_generator(
+            test_images
+        )
+        pred[pred <= 0.5] = 0
+        pred[pred > 0.5] = 1
+
+        print('Accuracy: \n')
+        print(accuracy_score(
+            test_images.classes,
+            pred
+        ))
+
+        graphs = Graphs()
+        graphs.show_confusion_matrix(
+            test_images.classes,
+            pred,
+            np.array(['glaucoma', 'healthy'])
+        )
+
+        if (accuracy_score(
+            test_images.classes,
+            pred
+        ) > 0.6):
+
+            # Serialize model to json.
+            model_json = model.to_json()
+            with open("model_simple.json", "w") as json_file:
+                json_file.write(model_json)
+
+            # Serialize model to hdf5.
+            model.save_weights('model_simple.h5')
+            print('Saved model')
 
     def __create_eff_model(self):
         """

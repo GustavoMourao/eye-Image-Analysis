@@ -5,15 +5,13 @@ if __name__ == "__main__":
     """
     Get raw data and apply CNN model.
     """
-    TARGET_SIZE = (128, 128)
+    TARGET_SIZE = (256, 256)
     BATCH_SIZE = 32
-    EPOCHS = 100
-    IMAGE_SHAPE = (128, 128, 1)
-    IMAGE_SHAPE_EFFI = (128, 128, 3)
+    EPOCHS = 2
+    IMAGE_SHAPE = (256, 256, 3)
     inter = Interpreter(
         BATCH_SIZE,
-        # IMAGE_SHAPE,
-        IMAGE_SHAPE_EFFI,
+        IMAGE_SHAPE,
         EPOCHS,
         TARGET_SIZE
     )
@@ -21,12 +19,19 @@ if __name__ == "__main__":
     train_images, validation_images, test_images = inter.split_data()
 
     # Traditional method.
-    inter.train_model(
+    model, model_out = inter.train_model(
         train_images,
-        test_images,
         validation_images,
         'SGD',
-        2048
+        256
+    )
+
+    # Get score of test data from trained model.
+    inter.model_evaluation_test(
+        test_images,
+        validation_images,
+        model,
+        model_out
     )
 
     # inter = Interpreter(
