@@ -12,11 +12,15 @@ from keras.models import Model
 from WindowOpt.functions import *
 from WindowOpt.WindowsOpt import *
 from Graphs import Graphs
-import efficientnet.keras as efn
+# import efficientnet.keras as efn
 from keras import backend as K
 # import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import accuracy_score
+# Options: EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
+# Higher the number, the more complex the model is.
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB0 as Net
+from efficientnet_keras_transfer_learning.efficientnet import center_crop_and_resize, preprocess_input
 
 
 class Interpreter:
@@ -316,59 +320,111 @@ class Interpreter:
         self,
         train_images,
         test_images,
-        validation_images,
-        optimizer_test
+        validation_images
     ):
         """
         Refs.:
         https://www.kaggle.com/ateplyuk/keras-starter-efficientnet
         https://www.kaggle.com/krishnakatyal/keras-efficientnet-b3?utm_medium=email&utm_source=intercom&utm_campaign=competition-recaps-rsna-2019
         """
-        # --- Try 1.
-        # Optimizers
-        if optimizer_test == 'SGD':
-            optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
-        if optimizer_test == 'Ada':
-            optimizer = Adadelta(lr=0.0001)
-        if optimizer_test == 'Nadam':
-            optimizer = Nadam(lr=0.0001)
+#         # --- Try 1.
+#         # Optimizers
+#         if optimizer_test == 'SGD':
+#             optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+#         if optimizer_test == 'Ada':
+#             optimizer = Adadelta(lr=0.0001)
+#         if optimizer_test == 'Nadam':
+#             optimizer = Nadam(lr=0.0001)
 
-        eff_net = efn.EfficientNetB3(
+#         eff_net = efn.EfficientNetB3(
+#             weights='imagenet',
+#             include_top=False,
+#             pooling='avg',
+#             input_shape=self.image_shape
+#         )
+
+#         x = eff_net.output
+#         x = Dense(1024, activation="relu")(x)
+#         x = Dropout(0.5)(x)
+#         predictions = Dense(
+#             1,
+#             activation="sigmoid"
+#         )(x)
+#         model = Model(
+#             input=eff_net.input,
+#             output=predictions
+#         )
+#         model.compile(
+#             optimizer=optimizer,
+#             # optimizers.rmsprop(lr=0.0001, decay=1e-6),
+#             loss='binary_crossentropy',
+#             metrics=['accuracy']
+#         )
+
+#         model.summary()
+
+#         model_out = model.fit_generator(
+#             train_images,
+#             steps_per_epoch=2000 // self.batch_size,
+#             epochs=self.epochs,
+#             validation_data=validation_images,
+#             validation_steps=800 // self.batch_size
+#         )
+
+#         return model, model_out
+
+        # Loading pretrained conv base model.
+        model = Net(
             weights='imagenet',
             include_top=False,
-            pooling='avg',
-            input_shape=self.image_shape
+            input_shape=IMAGE_SHAPE
         )
-
-        x = eff_net.output
-        x = Dense(1024, activation="relu")(x)
-        x = Dropout(0.5)(x)
-        predictions = Dense(
-            1,
-            activation="sigmoid"
-        )(x)
-        model = Model(
-            input=eff_net.input,
-            output=predictions
-        )
-        model.compile(
-            optimizer=optimizer,
-            # optimizers.rmsprop(lr=0.0001, decay=1e-6),
-            loss='binary_crossentropy',
-            metrics=['accuracy']
-        )
-
+        
+        model = models.Sequential()
+        model.add(conv_base)
+        model.add(layers.GlobalMaxPooling2D(name="gap"))
+        # model.add(layers.Flatten(name="flatten"))
+        model.add(layers.Dropout(
+            0.2,
+            name="dropout_out"
+        ))
+        # model.add(layers.Dense(256, activation='relu', name="fc1"))
+        model.add(layers.Dense(
+            2,
+            activation='softmax',
+            name="fc_out"
+        ))
+        
         model.summary()
+        
+        print('This is the number of trainable layers '
+              'before freezing the conv base:', len(model.trainable_weights))
+
+        conv_base.trainable = False
+
+        print('This is the number of trainable layers '
+              'after freezing the conv base:', len(model.trainable_weights))
+        
+        model.compile(
+#             loss='categorical_crossentropy',
+            loss='sparse_categorical_crossentropy',
+            optimizer=optimizers.RMSprop(lr=2e-5),
+            metrics=['acc']
+        )
 
         model_out = model.fit_generator(
             train_images,
-            steps_per_epoch=2000 // self.batch_size,
-            epochs=self.epochs,
+            steps_per_epoch= len(train_images.classes) //batch_size,
+            epochs=epochs,
             validation_data=validation_images,
-            validation_steps=800 // self.batch_size
+            validation_steps= len(validation_images.classes) //batch_size,
+            verbose=1,
+            use_multiprocessing=True,
+            workers=2
         )
-
+        
         return model, model_out
+
 
     def model_evaluation_test(
         self,
