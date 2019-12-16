@@ -21,6 +21,9 @@ from sklearn.metrics import accuracy_score
 # Higher the number, the more complex the model is.
 from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB0 as Net
 from efficientnet_keras_transfer_learning.efficientnet import center_crop_and_resize, preprocess_input
+from tensorflow.keras import models
+from tensorflow.keras import layers
+from tensorflow.keras import optimizers
 
 
 class Interpreter:
@@ -374,12 +377,12 @@ class Interpreter:
 #         return model, model_out
 
         # Loading pretrained conv base model.
-        model = Net(
+        conv_base = Net(
             weights='imagenet',
             include_top=False,
-            input_shape=IMAGE_SHAPE
+            input_shape=self.image_shape
         )
-        
+
         model = models.Sequential()
         model.add(conv_base)
         model.add(layers.GlobalMaxPooling2D(name="gap"))
@@ -394,9 +397,9 @@ class Interpreter:
             activation='softmax',
             name="fc_out"
         ))
-        
+
         model.summary()
-        
+
         print('This is the number of trainable layers '
               'before freezing the conv base:', len(model.trainable_weights))
 
@@ -404,9 +407,9 @@ class Interpreter:
 
         print('This is the number of trainable layers '
               'after freezing the conv base:', len(model.trainable_weights))
-        
+
         model.compile(
-#             loss='categorical_crossentropy',
+            # loss='categorical_crossentropy',
             loss='sparse_categorical_crossentropy',
             optimizer=optimizers.RMSprop(lr=2e-5),
             metrics=['acc']
@@ -414,17 +417,16 @@ class Interpreter:
 
         model_out = model.fit_generator(
             train_images,
-            steps_per_epoch= len(train_images.classes) //batch_size,
-            epochs=epochs,
+            steps_per_epoch = len(train_images.classes) // batch_size,
+            epochs=self.epochs,
             validation_data=validation_images,
-            validation_steps= len(validation_images.classes) //batch_size,
+            validation_steps=len(validation_images.classes) // batch_size,
             verbose=1,
             use_multiprocessing=True,
             workers=2
         )
-        
-        return model, model_out
 
+        return model, model_out
 
     def model_evaluation_test(
         self,
