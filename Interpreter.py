@@ -326,9 +326,6 @@ class Interpreter:
         validation_images
     ):
         """
-        Refs.:
-        https://www.kaggle.com/ateplyuk/keras-starter-efficientnet
-        https://www.kaggle.com/krishnakatyal/keras-efficientnet-b3?utm_medium=email&utm_source=intercom&utm_campaign=competition-recaps-rsna-2019
         """
 #         # --- Try 1.
 #         # Optimizers
@@ -417,10 +414,10 @@ class Interpreter:
 
         model_out = model.fit_generator(
             train_images,
-            steps_per_epoch = len(train_images.classes) // batch_size,
+            steps_per_epoch = len(train_images.classes) // self.batch_size,
             epochs=self.epochs,
             validation_data=validation_images,
-            validation_steps=len(validation_images.classes) // batch_size,
+            validation_steps=len(validation_images.classes) // self.batch_size,
             verbose=1,
             use_multiprocessing=True,
             workers=2
