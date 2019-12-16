@@ -2,7 +2,7 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2, l1
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 import numpy as np
 from keras.optimizers import SGD, Adadelta, Nadam
 import keras
@@ -12,12 +12,11 @@ from keras.models import Model
 from WindowOpt.functions import *
 from WindowOpt.WindowsOpt import *
 from Graphs import Graphs
-# import efficientnet.keras as efn
+import efficientnet.keras as efn
 from keras import backend as K
-import tensorflow as tf
+# import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import accuracy_score
-from tensorflow.python.keras.metrics import Metric
 
 
 class Interpreter:
@@ -58,13 +57,22 @@ class Interpreter:
 
     def get_info_images(self, imagepath):
         """
+        Get train image information.
+
+        Args:
+        ---------
+            imagepath: path image
+
+        Return:
+        ---------
+            image information
         """
         return self.train_datagen.flow_from_directory(
             directory=imagepath,
             batch_size=self.batch_size,
             target_size=(225, 225),
             class_mode='binary'
-#             color_mode='grayscale'
+            # color_mode='grayscale'
         )
 
     def split_data(self):
@@ -82,8 +90,8 @@ class Interpreter:
             directory='./Data/train',
             batch_size=self.batch_size,
             target_size=self.target_size,
-            class_mode='binary',
-#             color_mode='grayscale'
+            class_mode='binary'
+            # color_mode='grayscale'
         )
 
         validation_images = self.test_datagen.flow_from_directory(
@@ -91,7 +99,7 @@ class Interpreter:
             batch_size=self.batch_size,
             target_size=self.target_size,
             class_mode='binary'
-#             color_mode='grayscale'
+            # color_mode='grayscale'
         )
 
         test_images = self.test_datagen.flow_from_directory(
@@ -99,7 +107,7 @@ class Interpreter:
             batch_size=self.batch_size,
             target_size=self.target_size,
             class_mode='binary'
-#             color_mode='grayscale'
+            # color_mode='grayscale'
         )
 
         return train_images, validation_images, test_images
@@ -215,20 +223,7 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        # Serialize model to json.
-        model_json = model.to_json()
-        with open("model_simple.json", "w") as json_file:
-            json_file.write(model_json)
-
-        # Serialize model to hdf5.
-        model.save_weights('model_simple.h5')
-        print('Saved model')
-
-        graphs = Graphs()
-        graphs.show_train_validation(
-            self.epochs,
-            model_out
-        )
+        return model, model_out
 
     def train_model(
         self,
@@ -281,7 +276,7 @@ class Interpreter:
         model.add(Conv2D(num_mid_kernel, (5, 5)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
-        
+
         model.add(Conv2D(128, (4, 4)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -344,10 +339,8 @@ class Interpreter:
             pooling='avg',
             input_shape=self.image_shape
         )
-        print('aqui 1')
 
         x = eff_net.output
-        # x = Flatten()(x)
         x = Dense(1024, activation="relu")(x)
         x = Dropout(0.5)(x)
         predictions = Dense(
@@ -358,14 +351,12 @@ class Interpreter:
             input=eff_net.input,
             output=predictions
         )
-        print('aqui 2')
         model.compile(
             optimizer=optimizer,
             # optimizers.rmsprop(lr=0.0001, decay=1e-6),
             loss='binary_crossentropy',
             metrics=['accuracy']
         )
-        print('aqui 3')
 
         model.summary()
 
@@ -377,67 +368,12 @@ class Interpreter:
             validation_steps=800 // self.batch_size
         )
 
-        print('----------------')
-        score = model.evaluate_generator(
-            validation_images,
-            len(validation_images.classes) // self.batch_size
-        )
-        print(score)
-
-        scores = model.predict_generator(
-            test_images,
-            len(validation_images.classes) // self.batch_size
-        )
-        print(scores)
-        print('----------------')
-
-        # Serialize model to json.
-        model_json = model.to_json()
-        with open("model_simple.json", "w") as json_file:
-            json_file.write(model_json)
-
-        # Serialize model to hdf5.
-        model.save_weights('model_simple.h5')
-        print('Saved model')
-
-        graphs = Graphs()
-        graphs.show_train_validation(
-            self.epochs,
-            model_out
-        )
-
-        # Test:
-        # pred = model.predict(
-        #     # test_images
-        #     train_images
-        # )
-        pred = model.predict_generator(
-            test_images
-            # len(test_images.classes) // self.batch_size
-        )
-        pred[pred <= 0.5] = 0
-        pred[pred > 0.5] = 1
-
-        print(accuracy_score(
-            test_images.classes,
-            # train_images.classes,
-            pred
-        ))
-
-        graphs = Graphs()
-        graphs.show_confusion_matrix(
-            test_images.classes,
-            # train_images.classes,
-            pred,
-            np.array(['glaucoma', 'healthy'])
-        )
-
-        return model_out
+        return model, model_out
 
     def model_evaluation_test(
         self,
         test_images,
-        validation_images,        
+        validation_images,
         model,
         model_out
     ):
@@ -446,19 +382,16 @@ class Interpreter:
 
         Args:
         ---------
-            model: 
-            model_out: 
+        test_images: set of test data
+        validation_images: set of validation data
+        model: model
+        model_out: trained model
 
         Return:
         ---------
-            loss and accuracy graph; model
+            shows confusion matrix and saves model case
+            accuracy higher than 0.6
         """
-        # Get score from test images after train.
-        scores = model.predict_generator(
-            test_images,
-            len(validation_images.classes) // self.batch_size
-        )
-
         graphs = Graphs()
         graphs.show_train_validation(
             self.epochs,
@@ -484,6 +417,8 @@ class Interpreter:
             np.array(['glaucoma', 'healthy'])
         )
 
+        # Saves model case accuracy higher than 0.6
+        # TODO: Insert this into unit test class
         if (accuracy_score(
             test_images.classes,
             pred
