@@ -346,12 +346,6 @@ class Interpreter:
             loss and accuracy graph; model
         """
         conv_base = self.__get_eff_model(topology)
-        # Loading pretrained conv base model.
-#         conv_base = Net0(
-#             weights='imagenet',
-#             include_top=False,
-#             input_shape=self.image_shape
-#         )
 
         model = models.Sequential()
         model.add(conv_base)
