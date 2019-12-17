@@ -2,7 +2,6 @@ from keras.models import Sequential
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Activation, Dropout
 from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2, l1
-# import matplotlib.pyplot as plt
 import numpy as np
 from keras.optimizers import SGD, Adadelta, Nadam
 import keras
@@ -17,9 +16,7 @@ from keras import backend as K
 # import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import accuracy_score
-# Options: EfficientNetB0, EfficientNetB1, EfficientNetB2, EfficientNetB3
-# Higher the number, the more complex the model is.
-from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB0 as Net
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB0 as Net0
 from efficientnet_keras_transfer_learning.efficientnet import center_crop_and_resize, preprocess_input
 from tensorflow.keras import models
 from tensorflow.keras import layers
@@ -29,7 +26,7 @@ from tensorflow.keras import optimizers
 class Interpreter:
     """
     Class responsible to split raw data into train, validation and test.
-    Besides of that, allows to train two different CNN topologies.
+    Besides of that, allows to train different CNN topologies.
     """
     def __init__(
         self,
@@ -240,7 +237,7 @@ class Interpreter:
         num_mid_kernel
     ):
         """
-        Train simple CNN model
+        Train simple CNN model.
 
         Args:
         ---------
@@ -326,55 +323,21 @@ class Interpreter:
         validation_images
     ):
         """
+        Train last layer of EfficientNet. It is possible to choose between
+        EfficientNet-B0 to B7.
+
+        Args:
+        ---------
+            train_image: train set of data
+            test_image: test set of data
+            validation_images: validation set of data
+
+        Return:
+        ---------
+            loss and accuracy graph; model
         """
-#         # --- Try 1.
-#         # Optimizers
-#         if optimizer_test == 'SGD':
-#             optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
-#         if optimizer_test == 'Ada':
-#             optimizer = Adadelta(lr=0.0001)
-#         if optimizer_test == 'Nadam':
-#             optimizer = Nadam(lr=0.0001)
-
-#         eff_net = efn.EfficientNetB3(
-#             weights='imagenet',
-#             include_top=False,
-#             pooling='avg',
-#             input_shape=self.image_shape
-#         )
-
-#         x = eff_net.output
-#         x = Dense(1024, activation="relu")(x)
-#         x = Dropout(0.5)(x)
-#         predictions = Dense(
-#             1,
-#             activation="sigmoid"
-#         )(x)
-#         model = Model(
-#             input=eff_net.input,
-#             output=predictions
-#         )
-#         model.compile(
-#             optimizer=optimizer,
-#             # optimizers.rmsprop(lr=0.0001, decay=1e-6),
-#             loss='binary_crossentropy',
-#             metrics=['accuracy']
-#         )
-
-#         model.summary()
-
-#         model_out = model.fit_generator(
-#             train_images,
-#             steps_per_epoch=2000 // self.batch_size,
-#             epochs=self.epochs,
-#             validation_data=validation_images,
-#             validation_steps=800 // self.batch_size
-#         )
-
-#         return model, model_out
-
         # Loading pretrained conv base model.
-        conv_base = Net(
+        conv_base = Net0(
             weights='imagenet',
             include_top=False,
             input_shape=self.image_shape
@@ -459,12 +422,6 @@ class Interpreter:
         pred[pred <= 0.5] = 0
         pred[pred > 0.5] = 1
 
-        print('Accuracy: \n')
-        print(accuracy_score(
-            test_images.classes,
-            pred
-        ))
-
         graphs = Graphs()
         graphs.show_confusion_matrix(
             test_images.classes,
@@ -472,8 +429,13 @@ class Interpreter:
             np.array(['glaucoma', 'healthy'])
         )
 
+        print('Accuracy: \n')
+        print(accuracy_score(
+            test_images.classes,
+            pred
+        ))
+
         # Saves model case accuracy higher than 0.6
-        # TODO: Insert this into unit test class
         if (accuracy_score(
             test_images.classes,
             pred
