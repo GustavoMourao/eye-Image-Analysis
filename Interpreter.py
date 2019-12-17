@@ -17,6 +17,13 @@ from keras import backend as K
 from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import accuracy_score
 from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB0 as Net0
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB1 as Net1
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB2 as Net2
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB3 as Net3
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB4 as Net4
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB5 as Net5
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB6 as Net6
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB7 as Net7
 from efficientnet_keras_transfer_learning.efficientnet import center_crop_and_resize, preprocess_input
 from tensorflow.keras import models
 from tensorflow.keras import layers
@@ -320,7 +327,8 @@ class Interpreter:
         self,
         train_images,
         test_images,
-        validation_images
+        validation_images,
+        topology=0
     ):
         """
         Train last layer of EfficientNet. It is possible to choose between
@@ -331,17 +339,19 @@ class Interpreter:
             train_image: train set of data
             test_image: test set of data
             validation_images: validation set of data
+            topology: (0) - EfficientNetB0; (1) - EfficientNetB1; ...
 
         Return:
         ---------
             loss and accuracy graph; model
         """
+        conv_base = self.__get_eff_model(topology)
         # Loading pretrained conv base model.
-        conv_base = Net0(
-            weights='imagenet',
-            include_top=False,
-            input_shape=self.image_shape
-        )
+#         conv_base = Net0(
+#             weights='imagenet',
+#             include_top=False,
+#             input_shape=self.image_shape
+#         )
 
         model = models.Sequential()
         model.add(conv_base)
@@ -450,37 +460,70 @@ class Interpreter:
             model.save_weights('model_simple.h5')
             print('Saved model')
 
-    def __create_eff_model(self):
+    def __get_eff_model(self, topology):
         """
-        """
-        K.clear_session()
-        base_model = efn.EfficientNetB3(
-            weights='imagenet',
-            include_top=False,
-            pooling='avg',
-            input_shape=self.image_shape
-        )
+        Return topology of efficientnet. Options: EfficentNetB0 - B7.
 
-        x = base_model.output
-        y_pred = Dense(
-            6,
-            activation='sigmoid'
-        )(x)
+        Args:
+        ---------
+            topology: (0) - EfficientNetB0; (1) - EfficientNetB1; ...
 
-        return Model(
-            inputs=base_model.input,
-            outputs=y_pred
-        )
+        Return:
+        ---------
+            choosed model
+        """
+        if topology == 0:
+            return Net0(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
 
-    def __model_checkpoint_full(self, model_name):
-        """
-        """
-        return ModelCheckpoint(
-            model_name,
-            monitor = 'val_loss',
-            verbose = 1,
-            save_best_only = False,
-            save_weights_only = True,
-            mode = 'min',
-            period = 1
-        )
+        if topology == 1:
+            return Net1(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
+        
+        if topology == 2:
+            return Net2(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
+        
+        if topology == 3:
+            return Net3(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
+        
+        if topology == 4:
+            return Net4(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
+        
+        if topology == 5:
+            return Net5(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
+        
+        if topology == 6:
+            return Net6(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
+        
+        if topology == 7:
+            return Net7(
+                weights='imagenet',
+                include_top=False,
+                input_shape=self.image_shape
+            )
