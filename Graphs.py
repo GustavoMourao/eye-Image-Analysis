@@ -77,13 +77,13 @@ class Graphs:
         ax = fig1.add_subplot(1, 1, 1)
         sns.lineplot(
             x=model_info['N'],
-            y=model_info['accuracy'],
+            y=model_info['acc'],
             data=model_info
         )
 
         sns.lineplot(
             x=model_info['N'],
-            y=model_info['val_accuracy'],
+            y=model_info['val_acc'],
             data=model_info
         )
 
