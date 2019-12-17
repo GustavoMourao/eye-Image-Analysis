@@ -32,10 +32,8 @@ class Graphs:
         model_info['N'] = N
         model_info['loss'] = model_out.history["loss"]
         model_info['val_loss'] = model_out.history["val_loss"]
-#         model_info['accuracy'] = model_out.history["accuracy"]
-#         model_info['val_accuracy'] = model_out.history["val_accuracy"]
-        model_info['acc'] = model_out.history["acc"]
-        model_info['val_acc'] = model_out.history["val_acc"]
+        model_info['acc'] = model_out.history['acc']
+        model_info['val_acc'] = model_out.history['val_acc']
 
         # loss graphs
         fig1 = plt.figure(figsize=(12, 12))
