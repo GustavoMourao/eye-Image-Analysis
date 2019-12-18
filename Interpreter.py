@@ -8,8 +8,8 @@ import keras
 from keras import regularizers
 from keras.layers import GlobalAveragePooling2D
 from keras.models import Model
-from WindowOpt.functions import *
-from WindowOpt.WindowsOpt import *
+# from WindowOpt.functions import *
+# from WindowOpt.WindowsOpt import *
 from Graphs import Graphs
 # import efficientnet.keras as efn
 from keras import backend as K
@@ -479,42 +479,42 @@ class Interpreter:
                 include_top=False,
                 input_shape=self.image_shape
             )
-        
+
         if topology == 2:
             return Net2(
                 weights='imagenet',
                 include_top=False,
                 input_shape=self.image_shape
             )
-        
+
         if topology == 3:
             return Net3(
                 weights='imagenet',
                 include_top=False,
                 input_shape=self.image_shape
             )
-        
+
         if topology == 4:
             return Net4(
                 weights='imagenet',
                 include_top=False,
                 input_shape=self.image_shape
             )
-        
+
         if topology == 5:
             return Net5(
                 weights='imagenet',
                 include_top=False,
                 input_shape=self.image_shape
             )
-        
+
         if topology == 6:
             return Net6(
                 weights='imagenet',
                 include_top=False,
                 input_shape=self.image_shape
             )
-        
+
         if topology == 7:
             return Net7(
                 weights='imagenet',
