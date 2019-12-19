@@ -355,13 +355,16 @@ class Interpreter:
             0.2,
             name="dropout_out"
         ))
+        print('Net before add:')
+        model.summary()
+
         # model.add(layers.Dense(256, activation='relu', name="fc1"))
         model.add(layers.Dense(
             2,
             activation='softmax',
             name="fc_out"
         ))
-
+        print('Net after add:')
         model.summary()
 
         print('This is the number of trainable layers '
