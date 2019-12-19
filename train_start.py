@@ -18,6 +18,21 @@ if __name__ == "__main__":
 
     train_images, validation_images, test_images = inter.split_data()
 
+    # # Eff. net
+    # model, model_out = inter.train_efficient_net(
+    #     train_images,
+    #     test_images,
+    #     validation_images,
+    #     0
+    # )
+
+    # inter.model_evaluation_test(
+    #     test_images,
+    #     validation_images,
+    #     model,
+    #     model_out
+    # )
+
     # Traditional method.
     model, model_out = inter.train_model(
         train_images,
