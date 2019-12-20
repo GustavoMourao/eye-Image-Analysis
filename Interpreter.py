@@ -522,7 +522,7 @@ class Interpreter:
         train_images,
         test_images,
         validation_images,
-        num_classes=10,
+        num_classes=1,
     ):
         """ResNet Version 1 Model builder [a]
 
@@ -598,9 +598,10 @@ class Interpreter:
         model = Model(inputs=inputs, outputs=outputs)
 
         model.compile(
-            loss='categorical_crossentropy',
-            optimizer=Adam(learning_rate=0.001),
-            metrics=['accuracy']
+            # loss='categorical_crossentropy',
+            loss='sparse_categorical_crossentropy',
+            optimizer=optimizers.RMSprop(lr=2e-5),
+            metrics=['acc']
         )
         model.summary()
 
