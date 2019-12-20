@@ -428,14 +428,14 @@ class Interpreter:
         model.summary()
 
         model.add(layers.GlobalMaxPooling2D(name="gap"))
-        # model.add(layers.Flatten(name="flatten"))
+        model.add(layers.Flatten(name="flatten"))
         model.add(layers.Dropout(
             0.2,
             name="dropout_out"
         ))
         model.summary()
 
-        # model.add(layers.Dense(256, activation='relu', name="fc1"))
+        model.add(layers.Dense(256, activation='relu', name="fc1"))
         model.add(layers.Dense(
             2,
             activation='softmax',
@@ -447,7 +447,7 @@ class Interpreter:
         print('This is the number of trainable layers '
               'before freezing the conv base:', len(model.trainable_weights))
 
-        conv_base.trainable = False
+        # conv_base.trainable = False
 
         print('This is the number of trainable layers '
               'after freezing the conv base:', len(model.trainable_weights))
