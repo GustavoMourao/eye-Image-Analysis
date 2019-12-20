@@ -444,13 +444,13 @@ class Interpreter:
         print('Net after add:')
         model.summary()
 
-        print('This is the number of trainable layers '
-              'before freezing the conv base:', len(model.trainable_weights))
+        # print('This is the number of trainable layers '
+        #       'before freezing the conv base:', len(model.trainable_weights))
 
         # conv_base.trainable = False
 
-        print('This is the number of trainable layers '
-              'after freezing the conv base:', len(model.trainable_weights))
+        # print('This is the number of trainable layers '
+        #       'after freezing the conv base:', len(model.trainable_weights))
 
         model.compile(
             # loss='categorical_crossentropy',
