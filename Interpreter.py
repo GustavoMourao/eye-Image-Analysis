@@ -402,6 +402,7 @@ class Interpreter:
         train_images,
         test_images,
         validation_images,
+        pretrained=True,
         topology=0
     ):
         """
@@ -413,13 +414,14 @@ class Interpreter:
             train_image: train set of data
             test_image: test set of data
             validation_images: validation set of data
+            pretrained: [True] - Pretrained weights / [False] - Train weights
             topology: (0) - EfficientNetB0; (1) - EfficientNetB1; ...
 
         Return:
         ---------
             loss and accuracy graph; model
         """
-        conv_base = self.__get_eff_model(topology)
+        conv_base = self.__get_eff_model(pretrained, topology)
 
         model = models.Sequential()
         model.add(conv_base)
@@ -459,7 +461,7 @@ class Interpreter:
 
         model_out = model.fit_generator(
             train_images,
-            steps_per_epoch = len(train_images.classes) // self.batch_size,
+            steps_per_epoch=len(train_images.classes) // self.batch_size,
             epochs=self.epochs,
             validation_data=validation_images,
             validation_steps=len(validation_images.classes) // self.batch_size,
@@ -677,7 +679,7 @@ class Interpreter:
             model.save_weights('model_simple.h5')
             print('Saved model')
 
-    def __get_eff_model(self, topology):
+    def __get_eff_model(self, pretrained, topology):
         """
         Return topology of efficientnet. Options: EfficentNetB0 - B7.
 
@@ -689,58 +691,63 @@ class Interpreter:
         ---------
             choosed model
         """
+        if pretrained:
+            load_weight = 'imagenet'
+        else:
+            load_weight = None
+
         if topology == 0:
             return Net0(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 1:
             return Net1(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 2:
             return Net2(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 3:
             return Net3(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 4:
             return Net4(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 5:
             return Net5(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 6:
             return Net6(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
 
         if topology == 7:
             return Net7(
-                weights='imagenet',
+                weights=load_weight,
                 include_top=False,
                 input_shape=self.image_shape
             )
