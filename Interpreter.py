@@ -433,10 +433,6 @@ class Interpreter:
             0.2,
             name="dropout_out"
         ))
-<<<<<<< HEAD
-        print('Net before add:')
-=======
->>>>>>> 9040d3e81bb602d0cda84cb771c62097a200a740
         model.summary()
 
         # model.add(layers.Dense(256, activation='relu', name="fc1"))
