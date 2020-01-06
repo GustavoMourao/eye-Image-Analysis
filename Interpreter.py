@@ -524,6 +524,7 @@ class Interpreter:
         train_images,
         test_images,
         validation_images,
+        optimizer_test
         num_classes=1,
     ):
         """ResNet Version 1 Model builder [a]
@@ -555,6 +556,15 @@ class Interpreter:
         # Returns
             model (Model): Keras model instance
         """
+        
+        # Optimizers
+        if optimizer_test == 'SGD':
+            optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
+        if optimizer_test == 'Ada':
+            optimizer = Adadelta(lr=0.0001)
+        if optimizer_test == 'Nadam':
+            optimizer = Nadam(lr=0.0001)        
+
         if (depth - 2) % 6 != 0:
             raise ValueError('depth should be 6n+2 (eg 20, 32, 44 in [a])')
         # Start model definition.
@@ -602,7 +612,7 @@ class Interpreter:
         model.compile(
             # loss='categorical_crossentropy',
             loss='sparse_categorical_crossentropy',
-            optimizer=optimizers.RMSprop(lr=2e-5),
+            optimizer=optimizer,
             metrics=['acc']
         )
         model.summary()
