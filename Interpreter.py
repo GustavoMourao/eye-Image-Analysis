@@ -524,7 +524,7 @@ class Interpreter:
         train_images,
         test_images,
         validation_images,
-        optimizer_test
+        optimizer_test,
         num_classes=1,
     ):
         """ResNet Version 1 Model builder [a]
