@@ -15,15 +15,15 @@ from Graphs import Graphs
 # import tensorflow as tf
 from keras.layers.normalization import BatchNormalization
 from sklearn.metrics import accuracy_score
-from efficientnet_keras_transfer_learning import EfficientNetB0 as Net0
-from efficientnet_keras_transfer_learning import EfficientNetB1 as Net1
-from efficientnet_keras_transfer_learning import EfficientNetB2 as Net2
-from efficientnet_keras_transfer_learning import EfficientNetB3 as Net3
-from efficientnet_keras_transfer_learning import EfficientNetB4 as Net4
-from efficientnet_keras_transfer_learning import EfficientNetB5 as Net5
-from efficientnet_keras_transfer_learning import EfficientNetB6 as Net6
-from efficientnet_keras_transfer_learning import EfficientNetB7 as Net7
-from efficientnet_keras_transfer_learning import center_crop_and_resize, preprocess_input
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB0 as Net0
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB1 as Net1
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB2 as Net2
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB3 as Net3
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB4 as Net4
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB5 as Net5
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB6 as Net6
+from efficientnet_keras_transfer_learning.efficientnet import EfficientNetB7 as Net7
+from efficientnet_keras_transfer_learning.efficientnet import center_crop_and_resize, preprocess_input
 from tensorflow.keras import models
 from tensorflow.keras import layers
 from tensorflow.keras import optimizers
