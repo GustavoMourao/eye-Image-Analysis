@@ -37,23 +37,8 @@ from keras.preprocessing.image import ImageDataGenerator
 from keras.regularizers import l2
 from keras import backend as K
 from keras.models import Model
+from keras.utils import plot_model
 
-
-
-# Model parameter (Resnet case)
-# ----------------------------------------------------------------------------
-#           |      | 200-epoch | Orig Paper| 200-epoch | Orig Paper| sec/epoch
-# Model     |  n   | ResNet v1 | ResNet v1 | ResNet v2 | ResNet v2 | GTX1080Ti
-#           |v1(v2)| %Accuracy | %Accuracy | %Accuracy | %Accuracy | v1 (v2)
-# ----------------------------------------------------------------------------
-# ResNet20  | 3 (2)| 92.16     | 91.25     | -----     | -----     | 35 (---)
-# ResNet32  | 5(NA)| 92.46     | 92.49     | NA        | NA        | 50 ( NA)
-# ResNet44  | 7(NA)| 92.50     | 92.83     | NA        | NA        | 70 ( NA)
-# ResNet56  | 9 (6)| 92.71     | 93.03     | 93.01     | NA        | 90 (100)
-# ResNet110 |18(12)| 92.65     | 93.39+-.16| 93.15     | 93.63     | 165(180)
-# ResNet164 |27(18)| -----     | 94.07     | -----     | 94.54     | ---(---)
-# ResNet1001| (111)| -----     | 92.39     | -----     | 95.08+-.14| ---(---)
-# ---------------------------------------------------------------------------
 
 class Interpreter:
     """
@@ -107,8 +92,8 @@ class Interpreter:
             directory=imagepath,
             batch_size=self.batch_size,
             target_size=(225, 225),
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
     def split_data(self):
@@ -126,24 +111,24 @@ class Interpreter:
             directory='./Data/train',
             batch_size=self.batch_size,
             target_size=self.target_size,
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
         validation_images = self.test_datagen.flow_from_directory(
             directory='./Data/valid',
             batch_size=self.batch_size,
             target_size=self.target_size,
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
         test_images = self.test_datagen.flow_from_directory(
             directory='./Data/test',
             batch_size=self.batch_size,
             target_size=self.target_size,
-            class_mode='binary'
-            # color_mode='grayscale'
+            class_mode='binary',
+            color_mode='grayscale'
         )
 
         return train_images, validation_images, test_images
@@ -265,8 +250,7 @@ class Interpreter:
         self,
         train_images,
         validation_images,
-        optimizer_test,
-        num_mid_kernel
+        optimizer_test
     ):
         """
         Train simple CNN model.
@@ -290,12 +274,11 @@ class Interpreter:
             optimizer = Nadam(lr=0.0001)
 
         model = Sequential()
-        model.add(
-            Conv2D(
+        model.add(Conv2D(
                 32,
                 (3, 3),
                 input_shape=self.image_shape
-                )
+            )
         )
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
@@ -322,47 +305,7 @@ class Interpreter:
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
-        model.add(Conv2D(40, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(80, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(80, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(80, (3, 3)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(112, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(112, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(192, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(192, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(192, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(192, (5, 5)))
-        model.add(Activation('relu'))
-        model.add(MaxPooling2D(pool_size=(2, 2)))
-
-        model.add(Conv2D(320, (3, 3)))
+        model.add(Conv2D(40, (3, 3)))
         model.add(Activation('relu'))
         model.add(MaxPooling2D(pool_size=(2, 2)))
 
@@ -385,7 +328,13 @@ class Interpreter:
             optimizer=optimizer,
             metrics=['accuracy']
         )
+
+        # Model info.
         model.summary()
+        plot_model(
+            model,
+            to_file='simplified_model.png'
+        )
 
         model_out = model.fit_generator(
             train_images,
@@ -494,6 +443,21 @@ class Interpreter:
 
         # Returns
             x (tensor): tensor as input to the next layer
+
+        # Model parameter (Resnet case)
+        # ----------------------------------------------------------------------------
+        #           |      | 200-epoch | Orig Paper| 200-epoch | Orig Paper| sec/epoch
+        # Model     |  n   | ResNet v1 | ResNet v1 | ResNet v2 | ResNet v2 | GTX1080Ti
+        #           |v1(v2)| %Accuracy | %Accuracy | %Accuracy | %Accuracy | v1 (v2)
+        # ----------------------------------------------------------------------------
+        # ResNet20  | 3 (2)| 92.16     | 91.25     | -----     | -----     | 35 (---)
+        # ResNet32  | 5(NA)| 92.46     | 92.49     | NA        | NA        | 50 ( NA)
+        # ResNet44  | 7(NA)| 92.50     | 92.83     | NA        | NA        | 70 ( NA)
+        # ResNet56  | 9 (6)| 92.71     | 93.03     | 93.01     | NA        | 90 (100)
+        # ResNet110 |18(12)| 92.65     | 93.39+-.16| 93.15     | 93.63     | 165(180)
+        # ResNet164 |27(18)| -----     | 94.07     | -----     | 94.54     | ---(---)
+        # ResNet1001| (111)| -----     | 92.39     | -----     | 95.08+-.14| ---(---)
+        # ---------------------------------------------------------------------------
         """
         conv = Conv2D(num_filters,
                       kernel_size=kernel_size,
@@ -556,14 +520,14 @@ class Interpreter:
         # Returns
             model (Model): Keras model instance
         """
-        
+
         # Optimizers
         if optimizer_test == 'SGD':
             optimizer = SGD(lr=0.0001, decay=0, momentum=0.9, nesterov=True)
         if optimizer_test == 'Ada':
             optimizer = Adadelta(lr=0.0001)
         if optimizer_test == 'Nadam':
-            optimizer = Nadam(lr=0.0001)        
+            optimizer = Nadam(lr=0.0001)
 
         if (depth - 2) % 6 != 0:
             raise ValueError('depth should be 6n+2 (eg 20, 32, 44 in [a])')
@@ -577,23 +541,31 @@ class Interpreter:
         for stack in range(3):
             for res_block in range(num_res_blocks):
                 strides = 1
-                if stack > 0 and res_block == 0:  # first layer but not first stack
+                # first layer but not first stack
+                if stack > 0 and res_block == 0:
                     strides = 2  # downsample
-                y = self.resnet_layer(inputs=x,
-                                 num_filters=num_filters,
-                                 strides=strides)
-                y = self.resnet_layer(inputs=y,
-                                 num_filters=num_filters,
-                                 activation=None)
-                if stack > 0 and res_block == 0:  # first layer but not first stack
+                y = self.resnet_layer(
+                    inputs=x,
+                    num_filters=num_filters,
+                    strides=strides
+                )
+                y = self.resnet_layer(
+                    inputs=y,
+                    num_filters=num_filters,
+                    activation=None
+                )
+                # first layer but not first stack
+                if stack > 0 and res_block == 0:
                     # linear projection residual shortcut connection to match
                     # changed dims
-                    x = self.resnet_layer(inputs=x,
-                                     num_filters=num_filters,
-                                     kernel_size=1,
-                                     strides=strides,
-                                     activation=None,
-                                     batch_normalization=False)
+                    x = self.resnet_layer(
+                        inputs=x,
+                        num_filters=num_filters,
+                        kernel_size=1,
+                        strides=strides,
+                        activation=None,
+                        batch_normalization=False
+                    )
                 x = keras.layers.add([x, y])
                 x = Activation('relu')(x)
             num_filters *= 2
@@ -610,12 +582,17 @@ class Interpreter:
         model = Model(inputs=inputs, outputs=outputs)
 
         model.compile(
-            # loss='categorical_crossentropy',
-            loss='sparse_categorical_crossentropy',
+            loss='binary_crossentropy',
             optimizer=optimizer,
             metrics=['acc']
         )
+
+        # Model info.
         model.summary()
+        plot_model(
+            model,
+            to_file='resnet_model.png'
+        )
 
         model_out = model.fit_generator(
             train_images,

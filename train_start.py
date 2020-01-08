@@ -5,10 +5,10 @@ if __name__ == "__main__":
     """
     Get raw data and apply CNN model.
     """
-    TARGET_SIZE = (512, 512)
+    TARGET_SIZE = (244, 244)
     BATCH_SIZE = 8
-    EPOCHS = 100
-    IMAGE_SHAPE_EFFI = (512, 512, 3)
+    EPOCHS = 1
+    IMAGE_SHAPE_EFFI = (244, 244, 1)
 
     inter = Interpreter(
         BATCH_SIZE,
@@ -28,6 +28,7 @@ if __name__ == "__main__":
         depth=depth,
         train_images=train_images,
         test_images=test_images,
+        optimizer_test='Nadam',
         validation_images=validation_images
     )
 
@@ -39,21 +40,20 @@ if __name__ == "__main__":
         model_out
     )
 
-    # # Traditional method.
-    # model, model_out = inter.train_model(
-    #     train_images,
-    #     validation_images,
-    #     'Nadam',
-    #     256
-    # )
+    # Single model.
+    model, model_out = inter.train_model(
+        train_images,
+        validation_images,
+        'Nadam'
+    )
 
-    # # Get score of test data from trained model.
-    # inter.model_evaluation_test(
-    #     test_images,
-    #     validation_images,
-    #     model,
-    #     model_out
-    # )
+    # Get score of test data from trained model.
+    inter.model_evaluation_test(
+        test_images,
+        validation_images,
+        model,
+        model_out
+    )
 
     # # Eff. net
     # model, model_out = inter.train_efficient_net(

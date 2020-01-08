@@ -32,8 +32,15 @@ class Graphs:
         model_info['N'] = N
         model_info['loss'] = model_out.history["loss"]
         model_info['val_loss'] = model_out.history["val_loss"]
-        model_info['acc'] = model_out.history['acc']
-        model_info['val_acc'] = model_out.history['val_acc']
+
+        try:
+            model_info['acc'] = model_out.history['acc']
+            model_info['val_acc'] = model_out.history['val_acc']
+        except Exception:
+            model_info['acc'] = model_out.history['accuracy']
+            model_info['val_acc'] = model_out.history['val_accuracy']
+        else:
+            pass
 
         # loss graphs
         fig1 = plt.figure(figsize=(12, 12))
@@ -103,7 +110,7 @@ class Graphs:
             labels=['accuracy', 'val_accuracy']
         )
 
-#         plt.savefig('model1_accuracy')
+        plt.savefig('model1_accuracy')
         plt.show()
 
     def show_confusion_matrix(self, y_true, y_pred, classes):
