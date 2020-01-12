@@ -14,6 +14,8 @@ This repository has the structure:
 
 - `Graphs.py` - Class that implements graphs visualization.
 
+Besides of that, into the folder `AWS_EvalTest_Results` you can find some approaches to automatization of experiments related to tunning hyperparameters.
+
 ### Refereces
 
 ##### Images Datasets
