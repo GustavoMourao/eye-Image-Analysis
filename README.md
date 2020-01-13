@@ -14,6 +14,11 @@ This repository has the structure:
 
 - `Graphs.py` - Class that implements graphs visualization.
 
+- `train_model.ipynb` - Notebook responsible to train simplified model and and Resnet-20 at AWS-Sagemaker.
+
+- `train_transf_net.ipynb` - Notebook responsible to train EfficientNet-B0 until EfficientNet-B7 at AWS-Sagemaker.
+
+
 Besides of that, into the folder `AWS_EvalTest_Results` you can find some approaches to automatization of experiments related to tunning hyperparameters.
 
 ### Refereces
