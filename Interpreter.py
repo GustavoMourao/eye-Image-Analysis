@@ -467,7 +467,7 @@ class Interpreter:
             validation_steps=len(validation_images.classes) // self.batch_size,
             verbose=1,
             use_multiprocessing=True,
-            workers=5
+            workers=2
         )
 
         return model, model_out
